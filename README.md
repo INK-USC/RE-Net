@@ -20,7 +20,7 @@ python3 link_predict.py -d DATA_NAME --gpu 0 --model 0 --dropout 0.5 --n-hidden 
 
 The default hyperparameters give the best performances.
 
-###Model variants
+### Model variants
 The user must specify a --model, the variants of which are described in detail in the paper:
 - Attentive aggregator: --model 0
 - Mean aggregator: --model 1
