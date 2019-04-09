@@ -22,8 +22,8 @@ class RENet(nn.Module):
                                 gain=nn.init.calculate_gain('relu'))
 
         self.dropout = nn.Dropout(dropout)
-        self.sub_rnn = nn.GRU(3 * h_dim, h_dim, batch_first=True)
-        self.ob_rnn = nn.GRU(3 * h_dim, h_dim, batch_first=True)
+        self.sub_encoder = nn.GRU(3 * h_dim, h_dim, batch_first=True)
+        self.ob_encoder = nn.GRU(3 * h_dim, h_dim, batch_first=True)
 
         if model == 0: # Attentive Aggregator
             self.aggregator_s = AttnAggregator(h_dim, dropout, seq_len)
@@ -67,8 +67,8 @@ class RENet(nn.Module):
         s_packed_input = self.aggregator_s(s_hist, s, r, self.ent_embeds, self.rel_embeds)
         o_packed_input = self.aggregator_o(o_hist, o, r, self.ent_embeds, self.rel_embeds)
 
-        tt, s_h = self.sub_rnn(s_packed_input)
-        tt, o_h = self.ob_rnn(o_packed_input)
+        tt, s_h = self.sub_encoder(s_packed_input)
+        tt, o_h = self.ob_encoder(o_packed_input)
 
         s_h = s_h.squeeze()
         o_h = o_h.squeeze()
@@ -134,7 +134,7 @@ class RENet(nn.Module):
                 self.s_hist_test[s][r] = s_hist.copy()
             s_history = self.s_hist_test[s][r]
             inp = self.aggregator_s.predict(s_history, s, r, self.ent_embeds, self.rel_embeds)
-            tt, s_h = self.sub_rnn(inp.view(1, len(s_history), 3 * self.h_dim))
+            tt, s_h = self.sub_encoder(inp.view(1, len(s_history), 3 * self.h_dim))
             s_h = s_h.squeeze()
         
         if len(o_hist) == 0:
@@ -144,7 +144,7 @@ class RENet(nn.Module):
                 self.o_hist_test[o][r] = o_hist.copy()
             o_history = self.o_hist_test[o][r]
             inp = self.aggregator_o.predict(o_history, o, r, self.ent_embeds, self.rel_embeds)
-            tt, o_h = self.ob_rnn(inp.view(1, len(o_history), 3 * self.h_dim))
+            tt, o_h = self.ob_encoder(inp.view(1, len(o_history), 3 * self.h_dim))
             o_h = o_h.squeeze()
 
         ob_pred = self.linear_sub(torch.cat((self.ent_embeds[s], s_h, self.rel_embeds[r]), dim=0))
