@@ -5,9 +5,9 @@ from utils import *
 import time
 
 
-class LinkPredict(nn.Module):
+class RENet(nn.Module):
     def __init__(self, in_dim, h_dim, num_rels, dropout=0, model=0, seq_len=10, rnn_layers=1, num_k=10):
-        super(LinkPredict, self).__init__()
+        super(RENet, self).__init__()
         self.in_dim = in_dim
         self.h_dim = h_dim
         self.num_rels = num_rels

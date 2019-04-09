@@ -5,7 +5,7 @@ import torch
 import utils
 import resource
 import os
-from model import LinkPredict
+from model import RENet
 from sklearn.utils import shuffle
 import pickle
 
@@ -34,7 +34,7 @@ def main(args):
         model_state_file = 'models/'+args.dataset+'gcn.pth'
 
     print("start training...")
-    model = LinkPredict(num_nodes,
+    model = RENet(num_nodes,
                         args.n_hidden,
                         num_rels,
                         dropout=args.dropout,
@@ -93,7 +93,6 @@ def main(args):
 
 
         t3 = time.time()
-
 
         print("Epoch {:04d} | Loss {:.4f} | time {:.4f}".
               format(epoch, loss_epoch/(len(train_data)/args.batch_size), t3 - t0))
