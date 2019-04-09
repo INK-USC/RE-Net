@@ -1,7 +1,7 @@
 # PyTorch implementation of "Recurrent Event Network for Reasoning over Temporal Knowledge Graphs"
 
 Paper: [Recurrent Event Network for Reasoning over Temporal Knowledge Graph]()
-[ICLR 2019 Workshop on Representation Learning on Graphs and Manifolds 2019](https://rlgm.github.io).
+([ICLR 2019 Workshop on Representation Learning on Graphs and Manifolds 2019](https://rlgm.github.io))
 
 ## Installation
 Install PyTorch (>= 0.4.0) following the instuctions on the [official website](https://pytorch.org/).
