@@ -2,7 +2,7 @@ import torch.nn as nn
 import numpy as np
 import torch
 import torch.nn.functional as F
-import time
+from Aggregator import MeanAggregator, AttnAggregator
 
 
 class RENet(nn.Module):
@@ -22,27 +22,19 @@ class RENet(nn.Module):
                                 gain=nn.init.calculate_gain('relu'))
 
         self.dropout = nn.Dropout(dropout)
-        # Attentive aggregator
-        if model == 0:
-            self.sub_rnn = nn.GRU(3 * h_dim, h_dim, batch_first=True)
-            self.ob_rnn = nn.GRU(3 * h_dim, h_dim, batch_first=True)
+        self.sub_rnn = nn.GRU(3 * h_dim, h_dim, batch_first=True)
+        self.ob_rnn = nn.GRU(3 * h_dim, h_dim, batch_first=True)
 
-            self.attn_s = nn.Linear(3 * h_dim, h_dim)
-            self.attn_o = nn.Linear(3 * h_dim, h_dim)
-            self.v_s = nn.Parameter(torch.Tensor(h_dim, 1))
-            nn.init.xavier_uniform_(self.v_s, gain=nn.init.calculate_gain('relu'))
-            self.v_o = nn.Parameter(torch.Tensor(h_dim, 1))
-            nn.init.xavier_uniform_(self.v_o, gain=nn.init.calculate_gain('relu'))
+        if model == 0: # Attentive Aggregator
+            self.aggregator_s = AttnAggregator(h_dim, dropout, seq_len)
+            self.aggregator_o = AttnAggregator(h_dim, dropout, seq_len)
+        elif model == 1: # Mean Aggregator
+            self.aggregator_s = MeanAggregator(h_dim, dropout, seq_len, gcn=False)
+            self.aggregator_o = MeanAggregator(h_dim, dropout, seq_len, gcn=False)
+        elif model == 2: # GCN Aggregator
+            self.aggregator_s = MeanAggregator(h_dim, dropout, seq_len, gcn=True)
+            self.aggregator_o = MeanAggregator(h_dim, dropout, seq_len, gcn=True)
 
-
-
-        elif model == 1 or model == 2:
-            self.sub_rnn = nn.GRU(3 * h_dim, h_dim, batch_first=True)
-            self.ob_rnn = nn.GRU(3 * h_dim, h_dim, batch_first=True)
-
-            if model == 2:  # gcn aggregator
-                self.gcn_layer_sub = nn.Linear(h_dim, h_dim)
-                self.gcn_layer_ob = nn.Linear(h_dim, h_dim)
 
         self.linear_sub = nn.Linear(3 * h_dim, in_dim)
         self.linear_ob = nn.Linear(3 * h_dim, in_dim)
@@ -56,92 +48,6 @@ class RENet(nn.Module):
 
         self.criterion = nn.CrossEntropyLoss()
 
-    '''
-    Get sorted s and r to make batch for RNN (sorted by length)
-    '''
-    def get_sorted_s_r_embed(self, s_hist, s, r):
-        s_hist_len = torch.LongTensor(list(map(len, s_hist))).cuda()
-        s_len, s_idx = s_hist_len.sort(0, descending=True)
-        num_non_zero = len(torch.nonzero(s_len))
-        s_len_non_zero = s_len[:num_non_zero]
-
-        s_hist_sorted = []
-        for idx in s_idx:
-            s_hist_sorted.append(s_hist[idx.item()])
-        flat_s = []
-        len_s = []
-        s_hist_sorted = s_hist_sorted[:num_non_zero]
-        for hist in s_hist_sorted:
-            for neighs in hist:
-                len_s.append(len(neighs))
-                for neigh in neighs:
-                    flat_s.append(neigh)
-        s_tem = s[s_idx]
-        r_tem = r[s_idx]
-        embeds = self.ent_embeds[torch.LongTensor(flat_s).cuda()]
-        embeds_split = torch.split(embeds, len_s)
-        return s_len_non_zero, s_tem, r_tem, embeds_split
-
-    '''
-    Attention aggregator
-    '''
-    def get_input_model_0(self, s_hist, s, r, attn_s, v_s):
-        s_len_non_zero, s_tem, r_tem, embeds_split = self.get_sorted_s_r_embed(s_hist, s, r)
-        s_embed_seq_tensor = torch.zeros(len(s_len_non_zero), self.seq_len, 3 * self.h_dim).cuda()
-
-        curr = 0
-        for i, s_l in enumerate(s_len_non_zero):
-            # Make a batch, get first elements from all sequences, and get second elements from all sequences
-            em = embeds_split[curr:curr + s_l]
-            len_s = list(map(len, em))
-            curr += s_l
-
-            em_cat = torch.cat(em, dim=0)
-            ss = self.ent_embeds[s_tem[i]]
-            rr = self.ent_embeds[r_tem[i]]
-            ss = ss.repeat(len(em_cat), 1)
-            rr = rr.repeat(len(em_cat), 1)
-            em_s_r = torch.cat((em_cat, ss, rr), dim=1)
-            weights = F.tanh(attn_s(em_s_r)) @ v_s
-            weights_split = torch.split(weights, len_s)
-            weights_cat = list(map(lambda x: F.softmax(x, dim=0), weights_split))
-            embeds = torch.stack(list(map(lambda x, y: torch.sum(x * y, dim=0), weights_cat, em)))
-            s_embed_seq_tensor[i, torch.arange(len(embeds)), :] = torch.cat(
-                (embeds, self.ent_embeds[s_tem[i]].repeat(len(embeds), 1),
-                 self.rel_embeds[r_tem[i]].repeat(len(embeds), 1)), dim=1)
-
-        s_embed_seq_tensor = self.dropout(s_embed_seq_tensor)
-
-        s_packed_input = torch.nn.utils.rnn.pack_padded_sequence(s_embed_seq_tensor,
-                                                                 s_len_non_zero,
-                                                                 batch_first=True)
-
-        return s_packed_input
-
-    '''
-    Mean aggregator and GCN aggregator
-    '''
-    def get_input_model_1_2(self, s_hist, s, r, gcn_layer=None):
-        s_len_non_zero, s_tem, r_tem, embeds_split = self.get_sorted_s_r_embed(s_hist, s, r)
-        # To get mean vector at each time
-        embeds_mean = torch.stack(list(map(lambda x: torch.mean(x, dim=0), embeds_split)))
-        if self.model == 2:
-            embeds_mean = gcn_layer(embeds_mean)
-            embeds_mean = F.relu(embeds_mean)
-        embeds_split = torch.split(embeds_mean, s_len_non_zero.tolist())
-        s_embed_seq_tensor = torch.zeros(len(s_len_non_zero), self.seq_len, 3 * self.h_dim).cuda()
-        for i, embeds in enumerate(embeds_split):
-            s_embed_seq_tensor[i, torch.arange(len(embeds)), :] = torch.cat(
-                (embeds, self.ent_embeds[s_tem[i]].repeat(len(embeds), 1),
-                 self.rel_embeds[r_tem[i]].repeat(len(embeds), 1)), dim=1)
-
-        s_embed_seq_tensor = self.dropout(s_embed_seq_tensor)
-
-        s_packed_input = torch.nn.utils.rnn.pack_padded_sequence(s_embed_seq_tensor,
-                                                                 s_len_non_zero,
-                                                                 batch_first=True)
-        return s_packed_input
-
 
     """
     Prediction function in training. 
@@ -151,30 +57,23 @@ class RENet(nn.Module):
         s = triplets[:, 0]
         r = triplets[:, 1]
         o = triplets[:, 2]
+
         s_hist_len = torch.LongTensor(list(map(len, s_hist))).cuda()
         s_len, s_idx = s_hist_len.sort(0, descending=True)
+
         o_hist_len = torch.LongTensor(list(map(len, o_hist))).cuda()
         o_len, o_idx = o_hist_len.sort(0, descending=True)
 
-        if self.model == 0:
-            s_packed_input = self.get_input_model_0(s_hist, s, r, self.attn_s, self.v_s)
-            o_packed_input = self.get_input_model_0(o_hist, o, r, self.attn_o, self.v_o)
-        elif self.model ==1:
-            s_packed_input = self.get_input_model_1_2(s_hist, s, r)
-            o_packed_input = self.get_input_model_1_2(o_hist, o, r)
-        elif self.model ==2:
-            s_packed_input = self.get_input_model_1_2(s_hist, s, r, self.gcn_layer_sub)
-            o_packed_input = self.get_input_model_1_2(o_hist, o, r, self.gcn_layer_ob)
+        s_packed_input = self.aggregator_s(s_hist, s, r, self.ent_embeds, self.rel_embeds)
+        o_packed_input = self.aggregator_o(o_hist, o, r, self.ent_embeds, self.rel_embeds)
 
-
-        out_s, s_h = self.sub_rnn(s_packed_input)
-        out_o, o_h = self.ob_rnn(o_packed_input)
+        tt, s_h = self.sub_rnn(s_packed_input)
+        tt, o_h = self.ob_rnn(o_packed_input)
 
         s_h = s_h.squeeze()
         o_h = o_h.squeeze()
 
         # print(s_h.shape)
-
         s_h = torch.cat((s_h, torch.zeros(len(s) - len(s_h), self.h_dim).cuda()), dim=0)
         o_h = torch.cat((o_h, torch.zeros(len(o) - len(o_h), self.h_dim).cuda()), dim=0)
 
@@ -202,29 +101,6 @@ class RENet(nn.Module):
         loss, _, _, _, _ = self.forward(triplets, s_hist, o_hist)
         return loss
 
-    def get_input_model_0_pred(self, s_history, s, r, attn_s, v_s):
-        inp = torch.zeros(len(s_history), 3 * self.h_dim).cuda()
-        for i, s_s in enumerate(s_history):
-            emb_s = self.ent_embeds[s_s]
-            ss = self.ent_embeds[s].repeat(len(emb_s), 1)
-            rr = self.rel_embeds[r].repeat(len(emb_s), 1)
-
-            emb_s_r = torch.cat((emb_s, ss, rr), dim=1)
-            weights = F.softmax(F.tanh(attn_s(emb_s_r)) @ v_s, dim=0)
-
-            inp[i] = torch.cat((torch.sum(weights * emb_s, dim=0), self.ent_embeds[s], self.rel_embeds[r]), dim=0)
-        return inp
-
-    def get_input_model_1_2_pred(self, s_history, s, r, gcn_layer=None):
-        inp = torch.zeros(len(s_history), 3 * self.h_dim).cuda()
-        for i, s_o in enumerate(s_history):
-            tem = torch.mean(self.ent_embeds[s_o], dim=0)
-            if self.model == 2:
-                tem = F.relu(gcn_layer(tem))
-            inp[i] = torch.cat(
-                (tem, self.ent_embeds[s], self.rel_embeds[r]), dim=0)
-        return inp
-
     """
     Prediction function in testing
     """
@@ -251,79 +127,31 @@ class RENet(nn.Module):
             self.latest_time = t
 
         # If there is no history
-        if len(s_hist) == 0 and len(o_hist) == 0:
+        if len(s_hist) == 0:
             s_h = torch.zeros(self.h_dim).cuda()
-            o_h = torch.zeros(self.h_dim).cuda()
-
-        # If o has history
-        elif len(s_hist) == 0 and len(o_hist) != 0:
-            s_h = torch.zeros(self.h_dim).cuda()
-            if len(self.o_hist_test[o][r]) == 0:
-                self.o_hist_test[o][r] = o_hist.copy()
-            o_history = self.o_hist_test[o][r]
-
-            if self.model == 0:
-                inp = self.get_input_model_0_pred(o_history, o, r, self.attn_o, self.v_o)
-            elif self.model == 1:
-                inp = self.get_input_model_1_2_pred(o_history, o, r)
-            elif self.model == 2:
-                inp = self.get_input_model_1_2_pred(o_history, o, r, self.gcn_layer_ob)
-
-            tt, o_h = self.ob_rnn(inp.view(1, len(o_history), 3 * self.h_dim))
-            o_h = o_h.squeeze()
-
-        elif len(s_hist) != 0 and len(o_hist) == 0:
-            o_h = torch.zeros(self.h_dim).cuda()
+        else:
             if len(self.s_hist_test[s][r]) == 0:
                 self.s_hist_test[s][r] = s_hist.copy()
             s_history = self.s_hist_test[s][r]
-
-            if self.model == 0:
-                inp = self.get_input_model_0_pred(s_history, s, r, self.attn_s, self.v_s)
-            elif self.model == 1:
-                inp = self.get_input_model_1_2_pred(s_history, s, r)
-            elif self.model == 2:
-                inp = self.get_input_model_1_2_pred(s_history, s, r, self.gcn_layer_sub)
-
-
+            inp = self.aggregator_s.predict(s_history, s, r, self.ent_embeds, self.rel_embeds)
             tt, s_h = self.sub_rnn(inp.view(1, len(s_history), 3 * self.h_dim))
             s_h = s_h.squeeze()
-
-        elif len(s_hist) != 0 and len(o_hist) != 0:
-
+        
+        if len(o_hist) == 0:
+            o_h = torch.zeros(self.h_dim).cuda()
+        else:
             if len(self.o_hist_test[o][r]) == 0:
                 self.o_hist_test[o][r] = o_hist.copy()
             o_history = self.o_hist_test[o][r]
-
-            if self.model == 0:
-                inp = self.get_input_model_0_pred(o_history, o, r, self.attn_o, self.v_o)
-            elif self.model == 1:
-                inp = self.get_input_model_1_2_pred(o_history, o, r)
-            elif self.model == 2:
-                inp = self.get_input_model_1_2_pred(o_history, o, r, self.gcn_layer_ob)
-
+            inp = self.aggregator_o.predict(o_history, o, r, self.ent_embeds, self.rel_embeds)
             tt, o_h = self.ob_rnn(inp.view(1, len(o_history), 3 * self.h_dim))
             o_h = o_h.squeeze()
-
-            if len(self.s_hist_test[s][r]) == 0:
-                self.s_hist_test[s][r] = s_hist.copy()
-            s_history = self.s_hist_test[s][r]
-
-            if self.model == 0:
-                inp = self.get_input_model_0_pred(s_history, s, r, self.attn_s, self.v_s)
-            elif self.model == 1:
-                inp = self.get_input_model_1_2_pred(s_history, s, r)
-            elif self.model == 2:
-                inp = self.get_input_model_1_2_pred(s_history, s, r, self.gcn_layer_sub)
-
-            tt, s_h = self.sub_rnn(inp.view(1, len(s_history), 3 * self.h_dim))
-            s_h = s_h.squeeze()
 
         ob_pred = self.linear_sub(torch.cat((self.ent_embeds[s], s_h, self.rel_embeds[r]), dim=0))
         sub_pred = self.linear_ob(torch.cat((self.ent_embeds[o], o_h, self.rel_embeds[r]), dim=0))
 
-        tt, o_candidate = torch.topk(ob_pred, self.seq_len)
-        tt, s_candidate = torch.topk(sub_pred, self.seq_len)
+        ~, o_candidate = torch.topk(ob_pred, self.seq_len)
+        ~, s_candidate = torch.topk(sub_pred, self.seq_len)
         if len(self.s_his_cache[s][r]) == 0:
             self.s_his_cache[s][r] = o_candidate
         if len(self.o_his_cache[o][r]) == 0:

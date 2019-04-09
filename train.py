@@ -12,9 +12,9 @@ import pickle
 def train(args):
     # load data
     num_nodes, num_rels = utils.get_total_number('./data/' + args.dataset, 'stat.txt')
-    train_data, ~ = utils.load_quadruples('./data/' + args.dataset, 'train.txt')
-    valid_data, ~ = utils.load_quadruples('./data/' + args.dataset, 'valid.txt')
-    total_data, ~ = utils.load_quadruples('./data/' + args.dataset, 'train.txt', 'valid.txt','test.txt')
+    train_data, train_times = utils.load_quadruples('./data/' + args.dataset, 'train.txt')
+    valid_data, valid_times = utils.load_quadruples('./data/' + args.dataset, 'valid.txt')
+    total_data, total_times = utils.load_quadruples('./data/' + args.dataset, 'train.txt', 'valid.txt','test.txt')
 
     # check cuda
     use_cuda = args.gpu >= 0 and torch.cuda.is_available()
@@ -120,8 +120,11 @@ def train(args):
 
             if mrr > best_mrr:
                 best_mrr = mrr
-                torch.save({'state_dict': model.state_dict(), 'epoch': epoch, 's_hist': model.s_hist_test, 's_cache': model.s_his_cache, 'o_hist': model.o_hist_test, 'o_cache': model.o_his_cache, 'latest_time': model.latest_time},
-                            model_state_file)
+                torch.save({'state_dict': model.state_dict(), 'epoch': epoch, 
+                's_hist': model.s_hist_test, 's_cache': model.s_his_cache, 
+                'o_hist': model.o_hist_test, 'o_cache': model.o_his_cache, 
+                'latest_time': model.latest_time},
+                model_state_file)
 
     print("training done")
 

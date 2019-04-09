@@ -5,7 +5,7 @@ Paper: [Recurrent Event Network for Reasoning over Temporal Knowledge Graph](), 
 
 ## Installation
 Install PyTorch (>= 0.4.0) following the instuctions on the [official website](https://pytorch.org/).
-Our code is based on Python3. 
+Our code is written on Python3. 
 
 ## Train and Test
 Before running, you should preprocess datasets.
