@@ -1,5 +1,4 @@
-# Recurrent Event Network for Reasoning over Temporal Knowledge Graphs
-This repository is the official PyTorch implementation of "Recurrent Event Network for Reasoning over Temporal Knowledge Graphs".
+# PyTorch implementation of the paper "Recurrent Event Network for Reasoning over Temporal Knowledge Graphs".
 
 Paper: [Recurrent Event Network for Reasoning over Temporal Knowledge Graph](), [Representation Learning on Graphs and Manifolds 2019](https://rlgm.github.io).
 
