@@ -1,7 +1,7 @@
 import torch.nn as nn
+import numpy as np
 import torch
 import torch.nn.functional as F
-from utils import *
 import time
 
 
@@ -224,6 +224,7 @@ class RENet(nn.Module):
             inp[i] = torch.cat(
                 (tem, self.ent_embeds[s], self.rel_embeds[r]), dim=0)
         return inp
+
     """
     Prediction function in testing
     """

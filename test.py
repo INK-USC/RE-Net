@@ -10,9 +10,8 @@ import pickle
 def test(args):
     # load data
     num_nodes, num_rels = utils.get_total_number('./data/' + args.dataset, 'stat.txt')
-    test_data, test_times = utils.load_quadruples('./data/' + args.dataset, 'test.txt')
-    valid_data, valid_times = utils.load_quadruples('./data/' + args.dataset, 'valid.txt')
-    total_data, total_times = utils.load_quadruples('./data/' + args.dataset, 'train.txt', 'valid.txt','test.txt')
+    test_data, ~ = utils.load_quadruples('./data/' + args.dataset, 'test.txt')
+    total_data, ~ = utils.load_quadruples('./data/' + args.dataset, 'train.txt', 'valid.txt','test.txt')
     # check cuda
     use_cuda = args.gpu >= 0 and torch.cuda.is_available()
     if use_cuda:
@@ -45,16 +44,16 @@ def test(args):
 
 
     print("\nstart testing:")
-    if args.valid == 1:
-        checkpoint = torch.load(model_state_file, map_location=lambda storage, loc: storage)
-        model.load_state_dict(checkpoint['state_dict'])
-        model.s_hist_test = checkpoint['s_hist']
-        model.s_his_cache = checkpoint['s_cache']
-        model.o_hist_test = checkpoint['o_hist']
-        model.o_his_cache = checkpoint['o_cache']
-        model.latest_time = checkpoint['latest_time']
+        
+    checkpoint = torch.load(model_state_file, map_location=lambda storage, loc: storage)
+    model.load_state_dict(checkpoint['state_dict'])
+    model.s_hist_test = checkpoint['s_hist']
+    model.s_his_cache = checkpoint['s_cache']
+    model.o_hist_test = checkpoint['o_hist']
+    model.o_his_cache = checkpoint['o_cache']
+    model.latest_time = checkpoint['latest_time']
 
-        print("Using best epoch: {}".format(checkpoint['epoch']))
+    print("Using best epoch: {}".format(checkpoint['epoch']))
 
 
     total_data = torch.from_numpy(total_data)
