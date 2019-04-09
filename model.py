@@ -6,14 +6,13 @@ import time
 
 
 class RENet(nn.Module):
-    def __init__(self, in_dim, h_dim, num_rels, dropout=0, model=0, seq_len=10, rnn_layers=1, num_k=10):
+    def __init__(self, in_dim, h_dim, num_rels, dropout=0, model=0, seq_len=10):
         super(RENet, self).__init__()
         self.in_dim = in_dim
         self.h_dim = h_dim
         self.num_rels = num_rels
         self.model = model
         self.seq_len = seq_len
-        self.num_k = num_k
         self.rel_embeds = nn.Parameter(torch.Tensor(num_rels, h_dim))
         nn.init.xavier_uniform_(self.rel_embeds,
                                 gain=nn.init.calculate_gain('relu'))
@@ -322,8 +321,8 @@ class RENet(nn.Module):
         ob_pred = self.linear_sub(torch.cat((self.ent_embeds[s], s_h, self.rel_embeds[r]), dim=0))
         sub_pred = self.linear_ob(torch.cat((self.ent_embeds[o], o_h, self.rel_embeds[r]), dim=0))
 
-        tt, o_candidate = torch.topk(ob_pred, self.num_k)
-        tt, s_candidate = torch.topk(sub_pred, self.num_k)
+        tt, o_candidate = torch.topk(ob_pred, self.seq_len)
+        tt, s_candidate = torch.topk(sub_pred, self.seq_len)
         if len(self.s_his_cache[s][r]) == 0:
             self.s_his_cache[s][r] = o_candidate
         if len(self.o_his_cache[o][r]) == 0:

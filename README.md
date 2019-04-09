@@ -4,7 +4,7 @@ This repository is the official PyTorch implementation of "Recurrent Event Netwo
 Paper: [Recurrent Event Network for Reasoning over Temporal Knowledge Graph](), [Representation Learning on Graphs and Manifolds 2019](https://rlgm.github.io).
 
 ## Installation
-Install PyTorch (>= 0.4.0) following the instuctions on the [official website](https://pytorch.org/)
+Install PyTorch (>= 0.4.0) following the instuctions on the [official website](https://pytorch.org/).
 Our code is based on Python3. 
 
 ## Train and Test
@@ -14,8 +14,14 @@ python3 data/DATA_NAME/get_history.py
 ```
 
 Then, we are ready to train and test.
+We first train the model.
 ```bash
-python3 link_predict.py -d DATA_NAME --gpu 0 --model 0 --dropout 0.5 --n-hidden 200 --lr 1e-3 --max-epochs 20 --batch-size 1024
+python3 train.py -d DATA_NAME --gpu 0 --model 0 --dropout 0.5 --n-hidden 200 --lr 1e-3 --max-epochs 20 --batch-size 1024
+```
+
+We are ready to test!
+```bash
+python3 test.py -d DATA_NAME --gpu 0 --model 0 --n-hidden 200
 ```
 
 The default hyperparameters give the best performances.
