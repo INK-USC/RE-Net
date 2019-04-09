@@ -20,7 +20,7 @@ python3 link_predict.py -d DATA_NAME --gpu 0 --model 0 --dropout 0.5 --n-hidden 
 
 The default hyperparameters give the best performances.
 
-**Model variants**
+###Model variants
 The user must specify a --model, the variants of which are described in detail in the paper:
 - Attentive aggregator: --model 0
 - Mean aggregator: --model 1
@@ -36,4 +36,4 @@ We use the following public codes for baselines
 - Know-Evolve: [Link](https://github.com/rstriv/Know-Evolve)
 - HyTE: [Link](https://github.com/malllabiisc/HyTE)
 
-We implemented TA-TransE, TA-DistMult, and TTransE. You can find [here](https://github.com/changlinzhang/dynamic-KG-basic/tree/lastest-combined)
+We implemented TA-TransE, TA-DistMult, and TTransE. The user can find [here](https://github.com/changlinzhang/dynamic-KG-basic/tree/lastest-combined).
