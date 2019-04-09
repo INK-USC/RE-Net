@@ -29,7 +29,6 @@ def test(args):
     model = RENet(num_nodes,
                     args.n_hidden,
                     num_rels,
-                    dropout=args.dropout,
                     model=args.model,
                     seq_len=args.seq_len) 
 
