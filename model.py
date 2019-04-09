@@ -150,8 +150,8 @@ class RENet(nn.Module):
         ob_pred = self.linear_sub(torch.cat((self.ent_embeds[s], s_h, self.rel_embeds[r]), dim=0))
         sub_pred = self.linear_ob(torch.cat((self.ent_embeds[o], o_h, self.rel_embeds[r]), dim=0))
 
-        ~, o_candidate = torch.topk(ob_pred, self.seq_len)
-        ~, s_candidate = torch.topk(sub_pred, self.seq_len)
+        tt, o_candidate = torch.topk(ob_pred, self.seq_len)
+        tt, s_candidate = torch.topk(sub_pred, self.seq_len)
         if len(self.s_his_cache[s][r]) == 0:
             self.s_his_cache[s][r] = o_candidate
         if len(self.o_his_cache[o][r]) == 0:
