@@ -45,4 +45,4 @@ We use the following public codes for baselines
 We implemented TA-TransE, TA-DistMult, and TTransE. The user can find [here](https://github.com/changlinzhang/dynamic-KG-basic/tree/lastest-combined).
 
 ## Related Work
-We organized the list of [related work](https://github.com/woojeongjin/dynamic-KG)
+We organized the list of [related work](https://github.com/woojeongjin/dynamic-KG).
