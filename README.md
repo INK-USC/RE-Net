@@ -1,6 +1,7 @@
-## PyTorch implementation of "Recurrent Event Network for Reasoning over Temporal Knowledge Graphs"
+## PyTorch implementation of Recurrent Event Network (RE-Net)
 
 Paper: [Recurrent Event Network for Reasoning over Temporal Knowledge Graph]()
+
 ([ICLR Workshop on Representation Learning on Graphs and Manifolds](https://rlgm.github.io)), 2019
 
 ## Installation
