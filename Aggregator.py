@@ -165,5 +165,4 @@ def get_sorted_s_r_embed(s_hist, s, r, ent_embeds):
     s_tem = s[s_idx]
     r_tem = r[s_idx]
     embeds = ent_embeds[torch.LongTensor(flat_s).cuda()]
-    embeds_split = torch.split(embeds, len_s)
     return s_len_non_zero, s_tem, r_tem, embeds, len_s
