@@ -32,9 +32,17 @@ The user must specify a --model, the variants of which are described in detail i
 - Mean aggregator: --model 1
 - GCN aggregator: --model 2
 
+### Data
+There are two datasets: ICEWS18, GDELT.
+Each data folder has 'stat.txt', 'train.txt', 'valid.txt', 'test.txt', and 'get_history.py'.
+- 'get_history': This is for getting history for each entity.
+- 'stat.txt': First value is the number of entities, and second value is the number of relations.
+- 'train.txt', 'valid.txt', 'test.txt': First column is subject entities, second column is relations, and third column is object entities. The fourth column is time.
+
 
 ## Baselines
 We use the following public codes for baselines and the hyperparameters. We validated embedding sizes.
+
 | Baselines   | Code                                                                      | Embedding size | Batch size |
 |-------------|---------------------------------------------------------------------------|----------------|------------|
 | TransE      | [Link](https://github.com/jimmywangheng/knowledge_representation_pytorch) | 100, 200       | 1024       |
