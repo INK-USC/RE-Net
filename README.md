@@ -40,6 +40,22 @@ Each data folder has 'stat.txt', 'train.txt', 'valid.txt', 'test.txt', and 'get_
 - 'stat.txt': First value is the number of entities, and second value is the number of relations.
 - 'train.txt', 'valid.txt', 'test.txt': First column is subject entities, second column is relations, and third column is object entities. The fourth column is time.
 
+### Predictive performances
+In the ICEWS18 datasets, the results with filtered metrics:
+
+| Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
+|---------------|-------|--------|--------|---------|
+| RE-Net (mean) | 42.38 | 35.80  | 44.99  | 54.90   |
+| RE-Net (Attn) | 41.46 | 34.67  | 44.19  | 54.44   |
+| RE-Net (GCN)  | 41.35 | 34.53  | 44.05  | 54.35   |
+
+In the GDELT datasets, the results with filtered metrics:
+
+| Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
+|---------------|-------|--------|--------|---------|
+| RE-Net (mean) | 39.15 | 30.84  | 43.07  | 53.48   |
+| RE-Net (Attn) | 38.07 | 29.44  | 42.26  | 52.93   |
+| RE-Net (GCN)  | 37.99 | 30.05  | 41.40  | 52.18   |
 
 ## Baselines
 We use the following public codes for baselines and hyperparameters. We validated embedding sizes among presented values.
