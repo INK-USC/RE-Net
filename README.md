@@ -34,14 +34,26 @@ The user must specify a --model, the variants of which are described in detail i
 
 
 ## Baselines
-We use the following public codes for baselines
+We use the following public codes for baselines and the hyperparameters. We validated embedding sizes.
+| Baselines   | Code                                                                      | Embedding size | Batch size |
+|-------------|---------------------------------------------------------------------------|----------------|------------|
+| TransE      | [Link](https://github.com/jimmywangheng/knowledge_representation_pytorch) | 100, 200       | 1024       |
+| DistMult    | [Link](https://github.com/jimmywangheng/knowledge_representation_pytorch) | 100, 200       | 1024       |
+| ComplEx     | [Link](https://github.com/thunlp/OpenKE)                                  | 50, 100, 200   | 100        |
+| RGCN        | [Link](https://github.com/dmlc/dgl/tree/master/examples/pytorch/rgcn)     | 200            | Default    |
+| ConvE       | [Link](https://github.com/TimDettmers/ConvE)                              | 200            | 128        |
+| Know-Evolve | [Link](https://github.com/rstriv/Know-Evolve)                             | Default        | Default    |
+| HyTE        | [Link](https://github.com/malllabiisc/HyTE)                               | 128            | Default    |
+
+
+<!-- We use the following public codes for baselines
 - TransE, DistMult: [Link](https://github.com/jimmywangheng/knowledge_representation_pytorch)
 - ComplEx: [Link](https://github.com/thunlp/OpenKE)
 - RGCN: [Link](https://github.com/dmlc/dgl/tree/master/examples/pytorch/rgcn)
 - ConvE: [Link](https://github.com/TimDettmers/ConvE)
 - Know-Evolve: [Link](https://github.com/rstriv/Know-Evolve)
 - HyTE: [Link](https://github.com/malllabiisc/HyTE)
-
+ -->
 We implemented TA-TransE, TA-DistMult, and TTransE. The user can find [here](https://github.com/changlinzhang/dynamic-KG-basic/tree/lastest-combined).
 
 ## Related Work
