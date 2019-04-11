@@ -41,7 +41,7 @@ Each data folder has 'stat.txt', 'train.txt', 'valid.txt', 'test.txt', and 'get_
 - 'train.txt', 'valid.txt', 'test.txt': First column is subject entities, second column is relations, and third column is object entities. The fourth column is time.
 
 ### Predictive performances
-In the ICEWS18 datasets, the results with filtered metrics:
+In the **ICEWS18** dataset, the results with **filtered** metrics:
 
 | Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
 |---------------|-------|--------|--------|---------|
@@ -49,7 +49,7 @@ In the ICEWS18 datasets, the results with filtered metrics:
 | RE-Net (Attn) | 41.46 | 34.67  | 44.19  | 54.44   |
 | RE-Net (GCN)  | 41.35 | 34.53  | 44.05  | 54.35   |
 
-In the GDELT datasets, the results with filtered metrics:
+In the **GDELT** dataset, the results with **filtered** metrics:
 
 | Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
 |---------------|-------|--------|--------|---------|
