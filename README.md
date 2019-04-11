@@ -41,7 +41,7 @@ Each data folder has 'stat.txt', 'train.txt', 'valid.txt', 'test.txt', and 'get_
 
 
 ## Baselines
-We use the following public codes for baselines and the hyperparameters. We validated embedding sizes.
+We use the following public codes for baselines and hyperparameters. We validated embedding sizes among presented values.
 
 | Baselines   | Code                                                                      | Embedding size | Batch size |
 |-------------|---------------------------------------------------------------------------|----------------|------------|
