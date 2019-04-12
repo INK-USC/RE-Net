@@ -79,7 +79,7 @@ We use the following public codes for baselines and hyperparameters. We validate
 - Know-Evolve: [Link](https://github.com/rstriv/Know-Evolve)
 - HyTE: [Link](https://github.com/malllabiisc/HyTE)
  -->
-We implemented TA-TransE, TA-DistMult, and TTransE. The user can find [here](https://github.com/changlinzhang/dynamic-KG-basic/tree/lastest-combined).
+We implemented TA-TransE, TA-DistMult, and TTransE. The user can find implementations in the 'baselines' folder.
 
 ## Related Work
 There are related literatures: Temporal Knowledge Graph Embedding, Dynamic Graph Embedding, Knowledge Graph Embedding, Static Graph Embedding, etc.
