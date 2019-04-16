@@ -33,29 +33,16 @@ The user must specify a --model, the variants of which are described in detail i
 - Mean aggregator: --model 1
 - GCN aggregator: --model 2
 
-### Data
+## Related Work
+There are related literatures: Temporal Knowledge Graph Embedding, Dynamic Graph Embedding, Knowledge Graph Embedding, Static Graph Embedding, etc.
+We organized the list of [related work](https://github.com/woojeongjin/dynamic-KG).
+
+## Datasets
 There are two datasets: ICEWS18, GDELT.
 Each data folder has 'stat.txt', 'train.txt', 'valid.txt', 'test.txt', and 'get_history.py'.
 - 'get_history': This is for getting history for each entity.
 - 'stat.txt': First value is the number of entities, and second value is the number of relations.
 - 'train.txt', 'valid.txt', 'test.txt': First column is subject entities, second column is relations, and third column is object entities. The fourth column is time.
-
-### Predictive performances
-In the **ICEWS18** dataset, the results with **filtered** metrics:
-
-| Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
-|---------------|-------|--------|--------|---------|
-| RE-Net (mean) | 42.38 | 35.80  | 44.99  | 54.90   |
-| RE-Net (Attn) | 41.46 | 34.67  | 44.19  | 54.44   |
-| RE-Net (GCN)  | 41.35 | 34.53  | 44.05  | 54.35   |
-
-In the **GDELT** dataset, the results with **filtered** metrics:
-
-| Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
-|---------------|-------|--------|--------|---------|
-| RE-Net (mean) | 39.15 | 30.84  | 43.07  | 53.48   |
-| RE-Net (Attn) | 38.07 | 29.44  | 42.26  | 52.93   |
-| RE-Net (GCN)  | 37.99 | 30.05  | 41.40  | 52.18   |
 
 ## Baselines
 We use the following public codes for baselines and hyperparameters. We validated embedding sizes among presented values.
@@ -81,6 +68,21 @@ We use the following public codes for baselines and hyperparameters. We validate
  -->
 We implemented TA-TransE, TA-DistMult, and TTransE. The user can find implementations in the 'baselines' folder.
 
-## Related Work
-There are related literatures: Temporal Knowledge Graph Embedding, Dynamic Graph Embedding, Knowledge Graph Embedding, Static Graph Embedding, etc.
-We organized the list of [related work](https://github.com/woojeongjin/dynamic-KG).
+## Predictive performances
+In the **ICEWS18** dataset, the results with **filtered** metrics:
+
+| Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
+|---------------|-------|--------|--------|---------|
+| RE-Net (mean) | 42.38 | 35.80  | 44.99  | 54.90   |
+| RE-Net (Attn) | 41.46 | 34.67  | 44.19  | 54.44   |
+| RE-Net (GCN)  | 41.35 | 34.53  | 44.05  | 54.35   |
+
+In the **GDELT** dataset, the results with **filtered** metrics:
+
+| Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
+|---------------|-------|--------|--------|---------|
+| RE-Net (mean) | 39.15 | 30.84  | 43.07  | 53.48   |
+| RE-Net (Attn) | 38.07 | 29.44  | 42.26  | 52.93   |
+| RE-Net (GCN)  | 37.99 | 30.05  | 41.40  | 52.18   |
+
+
