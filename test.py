@@ -10,8 +10,8 @@ import pickle
 def test(args):
     # load data
     num_nodes, num_rels = utils.get_total_number('./data/' + args.dataset, 'stat.txt')
-    test_data, ~ = utils.load_quadruples('./data/' + args.dataset, 'test.txt')
-    total_data, ~ = utils.load_quadruples('./data/' + args.dataset, 'train.txt', 'valid.txt','test.txt')
+    test_data, test_times = utils.load_quadruples('./data/' + args.dataset, 'test.txt')
+    total_data, total_times = utils.load_quadruples('./data/' + args.dataset, 'train.txt', 'valid.txt','test.txt')
     # check cuda
     use_cuda = args.gpu >= 0 and torch.cuda.is_available()
     if use_cuda:
