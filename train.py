@@ -18,9 +18,11 @@ def train(args):
 
     # check cuda
     use_cuda = args.gpu >= 0 and torch.cuda.is_available()
+    seed = 999
+    np.random.seed(seed)
+    torch.manual_seed(seed)
     if use_cuda:
         torch.cuda.set_device(args.gpu)
-        torch.cuda.manual_seed_all(999)
 
     os.makedirs('models', exist_ok=True)
     if args.model == 0:
