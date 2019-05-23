@@ -117,9 +117,15 @@ class AttnAggregator(nn.Module):
         mask_tensor = torch.sparse.FloatTensor(idxes, weights)
         embeds_mean = torch.sparse.mm(mask_tensor, embeds_stack)
 
-        embeds_split2 = torch.split(embeds_mean, s_len_non_zero.tolist())
+        embeds_split = torch.split(embeds_mean, s_len_non_zero.tolist())
         s_embed_seq_tensor = torch.zeros(len(s_len_non_zero), self.seq_len, 3 * self.h_dim).cuda()
-        
+
+        for i, embeds in enumerate(embeds_split):
+            s_embed_seq_tensor[i, torch.arange(len(embeds)), :] = torch.cat(
+                (embeds, ent_embeds[s_tem[i]].repeat(len(embeds), 1),
+                 rel_embeds[r_tem[i]].repeat(len(embeds), 1)), dim=1)
+
+
         s_embed_seq_tensor = self.dropout(s_embed_seq_tensor)
 
         s_packed_input = torch.nn.utils.rnn.pack_padded_sequence(s_embed_seq_tensor,
