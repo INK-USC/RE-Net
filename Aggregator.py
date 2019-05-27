@@ -16,7 +16,7 @@ class MeanAggregator(nn.Module):
             self.gcn_layer = nn.Linear(h_dim, h_dim)
     
     def forward(self, s_hist, s, r, ent_embeds, rel_embeds):
-        s_len_non_zero, s_tem, r_tem, embeds_stack, len_s = get_sorted_s_r_embed(s_hist, s, r, ent_embeds)
+        s_len_non_zero, s_tem, r_tem, embeds_stack, len_s, embeds_split = get_sorted_s_r_embed(s_hist, s, r, ent_embeds)
 
         # To get mean vector at each time
         curr = 0
@@ -77,54 +77,30 @@ class AttnAggregator(nn.Module):
         nn.init.xavier_uniform_(self.v_s, gain=nn.init.calculate_gain('relu'))
 
     def forward(self, s_hist, s, r, ent_embeds, rel_embeds):
-        s_len_non_zero, s_tem, r_tem, embeds_stack, len_s = get_sorted_s_r_embed(s_hist, s, r, ent_embeds)
+        s_len_non_zero, s_tem, r_tem, embeds_stack, len_s, embeds_split = get_sorted_s_r_embed(s_hist, s, r, ent_embeds)
 
-        ss_all = None
-        rr_all = None
-        curr = 0
-        for i, s_l in enumerate(s_len_non_zero):
-            ss = ent_embeds[s_tem[i]]
-            rr = rel_embeds[r_tem[i]]
-            total_num = sum(len_s[curr:curr+s_l])
-            curr += s_l
-            ss = ss.repeat(total_num, 1)
-            rr = rr.repeat(total_num, 1)
-            if i ==0 :
-                ss_all = ss
-                rr_all = rr
-            else:
-                ss_all = torch.cat([ss_all, ss], dim=0)
-                rr_all = torch.cat([rr_all, rr], dim=0)
-
-        embeds_ss_rr = torch.cat([embeds_stack, ss_all, rr_all], dim=1)
-        weights = F.tanh(self.attn_s(embeds_ss_rr)) @ self.v_s
-        weights_split = torch.split(weights, len_s)
-        weights = torch.cat(list(map(lambda x: F.softmax(x, dim=0), weights_split)))
-
-
-        curr = 0
-        rows = []
-        cols = []
-        for i, leng in enumerate(len_s):
-            rows.extend([i] * leng)
-            cols.extend(list(range(curr,curr+leng)))
-            curr += leng
-        rows = torch.LongTensor(rows).cuda()
-        cols = torch.LongTensor(cols).cuda()
-        idxes = torch.stack([rows,cols], dim=0)
-
-
-        mask_tensor = torch.sparse.FloatTensor(idxes, weights)
-        embeds_mean = torch.sparse.mm(mask_tensor, embeds_stack)
-
-        embeds_split = torch.split(embeds_mean, s_len_non_zero.tolist())
         s_embed_seq_tensor = torch.zeros(len(s_len_non_zero), self.seq_len, 3 * self.h_dim).cuda()
 
-        for i, embeds in enumerate(embeds_split):
+        curr = 0
+        for i, s_l in enumerate(s_len_non_zero):
+            # Make a batch, get first elements from all sequences, and get second elements from all sequences
+            em = embeds_split[curr:curr + s_l]
+            len_s = list(map(len, em))
+            curr += s_l
+
+            em_cat = torch.cat(em, dim=0)
+            ss = ent_embeds[s_tem[i]]
+            rr = rel_embeds[r_tem[i]]
+            ss = ss.repeat(len(em_cat), 1)
+            rr = rr.repeat(len(em_cat), 1)
+            em_s_r = torch.cat((em_cat, ss, rr), dim=1)
+            weights = F.tanh(self.attn_s(em_s_r)) @ self.v_s
+            weights_split = torch.split(weights, len_s)
+            weights_cat = list(map(lambda x: F.softmax(x, dim=0), weights_split))
+            embeds = torch.stack(list(map(lambda x, y: torch.sum(x * y, dim=0), weights_cat, em)))
             s_embed_seq_tensor[i, torch.arange(len(embeds)), :] = torch.cat(
                 (embeds, ent_embeds[s_tem[i]].repeat(len(embeds), 1),
                  rel_embeds[r_tem[i]].repeat(len(embeds), 1)), dim=1)
-
 
         s_embed_seq_tensor = self.dropout(s_embed_seq_tensor)
 
@@ -171,4 +147,5 @@ def get_sorted_s_r_embed(s_hist, s, r, ent_embeds):
     s_tem = s[s_idx]
     r_tem = r[s_idx]
     embeds = ent_embeds[torch.LongTensor(flat_s).cuda()]
-    return s_len_non_zero, s_tem, r_tem, embeds, len_s
+    embeds_split = torch.split(embeds, len_s)
+    return s_len_non_zero, s_tem, r_tem, embeds, len_s, embeds_split
