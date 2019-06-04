@@ -2,7 +2,8 @@ import torch.nn as nn
 import numpy as np
 import torch
 import torch.nn.functional as F
-import time
+from utils import *
+from RGCN import RGCNBlockLayer as RGCNLayer
 
 
 class MeanAggregator(nn.Module):
@@ -123,29 +124,65 @@ class AttnAggregator(nn.Module):
             inp[i] = torch.cat((torch.sum(weights * emb_s, dim=0), ent_embeds[s], rel_embeds[r]), dim=0)
         return inp
 
+class RGCNAggregator(nn.Module):
+    def __init__(self, h_dim, dropout, num_nodes, num_rels, num_bases, model, seq_len=10):
+        super(RGCNAggregator, self).__init__()
+        self.h_dim = h_dim
+        self.dropout = nn.Dropout(dropout)
+        self.seq_len = seq_len
+        self.num_rels = num_rels
+        self.num_nodes = num_nodes
+        self.model = model
 
-'''
-Get sorted s and r to make batch for RNN (sorted by length)
-'''
-def get_sorted_s_r_embed(s_hist, s, r, ent_embeds):
-    s_hist_len = torch.LongTensor(list(map(len, s_hist))).cuda()
-    s_len, s_idx = s_hist_len.sort(0, descending=True)
-    num_non_zero = len(torch.nonzero(s_len))
-    s_len_non_zero = s_len[:num_non_zero]
+        self.rgcn1 = RGCNLayer(self.h_dim, self.h_dim, 2*self.num_rels, num_bases,
+                               activation=F.relu, self_loop=True, dropout=dropout)
+        self.rgcn2 = RGCNLayer(self.h_dim, self.h_dim, 2*self.num_rels, num_bases,
+                               activation=None, self_loop=True, dropout=dropout)
 
-    s_hist_sorted = []
-    for idx in s_idx:
-        s_hist_sorted.append(s_hist[idx.item()])
-    flat_s = []
-    len_s = []
-    s_hist_sorted = s_hist_sorted[:num_non_zero]
-    for hist in s_hist_sorted:
-        for neighs in hist:
-            len_s.append(len(neighs))
-            for neigh in neighs:
-                flat_s.append(neigh)
-    s_tem = s[s_idx]
-    r_tem = r[s_idx]
-    embeds = ent_embeds[torch.LongTensor(flat_s).cuda()]
-    embeds_split = torch.split(embeds, len_s)
-    return s_len_non_zero, s_tem, r_tem, embeds, len_s, embeds_split
+    def forward(self, s_hist, s, r, ent_embeds, rel_embeds, graph_dict, reverse):
+        s_len_non_zero, s_tem, r_tem, g, node_ids_graph = get_sorted_s_r_embed_rgcn(s_hist, s, r, ent_embeds, graph_dict)
+        if g is None:
+            s_packed_input = None
+        else:
+
+            self.rgcn1(g, reverse)
+            self.rgcn2(g, reverse)
+
+            embeds_mean = g.ndata.pop('h')
+            embeds_mean = embeds_mean[torch.LongTensor(node_ids_graph)]
+
+            embeds_split = torch.split(embeds_mean, s_len_non_zero.tolist())
+            s_embed_seq_tensor = torch.zeros(len(s_len_non_zero), self.seq_len, 3 * self.h_dim).cuda()
+
+            # Slow!!!
+            for i, embeds in enumerate(embeds_split):
+                s_embed_seq_tensor[i, torch.arange(len(embeds)), :] = torch.cat(
+                    (embeds, ent_embeds[s_tem[i]].repeat(len(embeds), 1),
+                     rel_embeds[r_tem[i]].repeat(len(embeds), 1)), dim=1)
+
+            s_embed_seq_tensor = self.dropout(s_embed_seq_tensor)
+
+            s_packed_input = torch.nn.utils.rnn.pack_padded_sequence(s_embed_seq_tensor,
+                                                                     s_len_non_zero,
+                                                                     batch_first=True)
+
+        return s_packed_input
+
+    def predict(self, s_history, s, r, ent_embeds, rel_embeds, graph_dict, reverse):
+        s_hist = s_history[0]
+
+        s_hist_t = s_history[1]
+        s_len_non_zero, s_tem, r_tem, g, node_ids_graph = get_sorted_s_r_embed_rgcn(([s_hist], [s_hist_t]), s.view(-1,1), r.view(-1,1), ent_embeds,
+                                                                                      graph_dict)
+        self.rgcn1(g, reverse)
+        self.rgcn2(g, reverse)
+
+        embeds_mean = g.ndata.pop('h')
+        embeds = embeds_mean[torch.LongTensor(node_ids_graph)]
+
+        inp = torch.zeros(len(s_hist), 3 * self.h_dim).cuda()
+        inp[torch.arange(len(embeds)),:] = torch.cat((embeds, ent_embeds[s].repeat(len(embeds),1), rel_embeds[r].repeat(len(embeds),1)), dim =1)
+
+        return inp
+
+

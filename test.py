@@ -18,28 +18,42 @@ def test(args):
         torch.cuda.set_device(args.gpu)
         torch.cuda.manual_seed_all(999)
 
-    os.makedirs('models', exist_ok=True)
     if args.model == 0:
-        model_state_file = 'models/'+args.dataset+'attn.pth'
+        model_state_file = 'models/' + args.dataset + 'attn.pth'
     elif args.model == 1:
-        model_state_file = 'models/'+args.dataset+'mean.pth'
+        model_state_file = 'models/' + args.dataset + 'mean.pth'
     elif args.model == 2:
-        model_state_file = 'models/'+args.dataset+'gcn.pth'
+        model_state_file = 'models/' + args.dataset + 'gcn.pth'
+    elif args.model == 3:
+        model_state_file = 'models/' + args.dataset + 'rgcn.pth'
+        model_graph_file = 'models/' + args.dataset + 'rgcn_graph.pth'
 
     model = RENet(num_nodes,
                     args.n_hidden,
                     num_rels,
                     model=args.model,
-                    seq_len=args.seq_len) 
+                    seq_len=args.seq_len,
+                    num_k=args.num_k) 
 
 
     if use_cuda:
         model.cuda()
 
-    with open('./data/' + args.dataset+'/test_history_sub.txt', 'rb') as f:
-        s_history_test = pickle.load(f)
-    with open('./data/' + args.dataset+'/test_history_ob.txt', 'rb') as f:
-        o_history_test = pickle.load(f)
+    if args.model == 3:
+        with open('../data/' + args.dataset+'/test_history_sub.txt', 'rb') as f:
+            s_history_test_data = pickle.load(f)
+        with open('../data/' + args.dataset+'/test_history_ob.txt', 'rb') as f:
+            o_history_test_data = pickle.load(f)
+
+        s_history_test = s_history_test_data[0]
+        s_history_test_t = s_history_test_data[1]
+        o_history_test = o_history_test_data[0]
+        o_history_test_t = o_history_test_data[1]
+    else:
+        with open('./data/' + args.dataset+'/test_history_sub1.txt', 'rb') as f:
+            s_history_test = pickle.load(f)
+        with open('./data/' + args.dataset+'/test_history_ob1.txt', 'rb') as f:
+            o_history_test = pickle.load(f)
 
 
     print("\nstart testing:")
@@ -51,6 +65,13 @@ def test(args):
     model.o_hist_test = checkpoint['o_hist']
     model.o_his_cache = checkpoint['o_cache']
     model.latest_time = checkpoint['latest_time']
+    if args.model == 3:
+        model.s_hist_test_t = checkpoint['s_hist_t']
+        model.s_his_cache_t = checkpoint['s_cache_t']
+        model.o_hist_test_t = checkpoint['o_hist_t']
+        model.o_his_cache_t = checkpoint['o_cache_t']
+        with open(model_graph_file, 'rb') as f:
+            model.graph_dict = pickle.load(f)
 
     print("Using best epoch: {}".format(checkpoint['epoch']))
 
@@ -72,6 +93,9 @@ def test(args):
         batch_data = test_data[i]
         s_hist = s_history_test[i]
         o_hist = o_history_test[i]
+        if args.model == 3:
+            s_hist_t = s_history_test_t[i]
+            o_hist_t = o_history_test_t[i]
         if latest_time != batch_data[3]:
             ranks.append(total_ranks_filter)
             latest_time = batch_data[3]
@@ -81,11 +105,11 @@ def test(args):
             batch_data = batch_data.cuda()
 
         with torch.no_grad():
-            # Raw metric
-            # ranks_filter, loss = model.evaluate(batch_data, s_hist, o_hist)
-
             # Filtered metric
-            ranks_filter, loss = model.evaluate_filter(batch_data, s_hist, o_hist, total_data)
+            if args.model == 3:
+                anks_filter, loss = model.evaluate_filter(batch_data, (s_hist,s_hist_t), (o_hist,o_hist_t), total_data)
+            else:
+                ranks_filter, loss = model.evaluate_filter(batch_data, s_hist, o_hist, total_data)
 
             total_ranks_filter = np.concatenate((total_ranks_filter, ranks_filter))
             total_loss += loss.item()
@@ -110,12 +134,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='RENet')
     parser.add_argument("-d", "--dataset", type=str, default='ICEWS18',
             help="dataset to use")
-    parser.add_argument("--gpu", type=int, default=-1,
+    parser.add_argument("--gpu", type=int, default=0,
             help="gpu")
     parser.add_argument("--model", type=int, default=0)
     parser.add_argument("--n-hidden", type=int, default=200,
             help="number of hidden units")
     parser.add_argument("--seq-len", type=int, default=10)
+    parser.add_argument("--num-k", type=int, default=10,
+                    help="cuttoff position")
 
     args = parser.parse_args()
     test(args)

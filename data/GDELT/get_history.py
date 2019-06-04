@@ -1,4 +1,3 @@
-import networkx as nx
 import numpy as np
 import os
 from collections import defaultdict
@@ -134,9 +133,9 @@ for i, train in enumerate(train_data):
     # print(s_history_data[i])
 
     # print(s_his_cache[r][s])
-with open('train_history_sub.txt', 'wb') as fp:
+with open('train_history_sub1.txt', 'wb') as fp:
     pickle.dump(s_history_data, fp)
-with open('train_history_ob.txt', 'wb') as fp:
+with open('train_history_ob1.txt', 'wb') as fp:
     pickle.dump(o_history_data, fp)
 
 # print(s_history_data[0])
@@ -171,9 +170,9 @@ for i, dev in enumerate(dev_data):
 
 
 
-with open('dev_history_sub.txt', 'wb') as fp:
+with open('dev_history_sub1.txt', 'wb') as fp:
     pickle.dump(s_history_data_dev, fp)
-with open('dev_history_ob.txt', 'wb') as fp:
+with open('dev_history_ob1.txt', 'wb') as fp:
     pickle.dump(o_history_data_dev, fp)
 
 
@@ -209,9 +208,9 @@ for i, test in enumerate(test_data):
 
 
 
-with open('test_history_sub.txt', 'wb') as fp:
+with open('test_history_sub1.txt', 'wb') as fp:
     pickle.dump(s_history_data_test, fp)
-with open('test_history_ob.txt', 'wb') as fp:
+with open('test_history_ob1.txt', 'wb') as fp:
     pickle.dump(o_history_data_test, fp)
     # print(train)
 
