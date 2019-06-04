@@ -100,6 +100,7 @@ def train(args):
             break
         epoch += 1
         loss_epoch = 0
+        t0 = time.time()
 
         if args.model == 3:
             for batch_data, s_hist, s_hist_t, o_hist, o_hist_t in utils.make_batch2(train_data, s_history, s_history_t,
@@ -129,7 +130,7 @@ def train(args):
                 optimizer.zero_grad()
                 loss_epoch += loss.item()
 
-
+        t3 = time.time()
         print("Epoch {:04d} | Loss {:.4f} | time {:.4f}".
               format(epoch, loss_epoch/(len(train_data)/args.batch_size), t3 - t0))
 
