@@ -33,6 +33,7 @@ def train(args):
         model_state_file = 'models/' + args.dataset + 'gcn.pth'
     elif args.model == 3:
         model_state_file = 'models/' + args.dataset + 'rgcn.pth'
+        model_graph_file = 'models/' + args.dataset + 'rgcn_graph.pth'
 
     print("start training...")
     model = RENet(num_nodes,
