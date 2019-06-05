@@ -190,7 +190,7 @@ class RENet(nn.Module):
                 s_history = self.s_hist_test[s]
                 s_history_t = self.s_hist_test_t[s]
                 inp = self.aggregator_s.predict((s_history, s_history_t), s, r, self.ent_embeds, self.rel_embeds[:self.num_rels], self.graph_dict, reverse=False)
-                tt, s_h = self.sub_rnn(inp.view(1, len(s_history), 3 * self.h_dim))
+                tt, s_h = self.sub_encoder(inp.view(1, len(s_history), 3 * self.h_dim))
                 s_h = s_h.squeeze()
             
             if len(o_hist[0]) == 0:
@@ -203,7 +203,7 @@ class RENet(nn.Module):
                 o_history_t = self.o_hist_test_t[o]
                 inp = self.aggregator_o.predict((o_history, o_history_t), o, r, self.ent_embeds, self.rel_embeds[self.num_rels:], self.graph_dict, reverse=True)
 
-                tt, o_h = self.ob_rnn(inp.view(1, len(o_history), 3 * self.h_dim))
+                tt, o_h = self.ob_encoder(inp.view(1, len(o_history), 3 * self.h_dim))
                 o_h = o_h.squeeze()
         
         else:

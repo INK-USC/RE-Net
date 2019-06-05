@@ -46,7 +46,7 @@ There are related literatures: Temporal Knowledge Graph Embedding, Dynamic Graph
 We organized the list of [related work](https://github.com/woojeongjin/dynamic-KG).
 
 ## Datasets
-There are four datasets: ICEWS18, GDELT, WIKI, and YAGO.
+There are four datasets: [ICEWS18](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28075/Z1ZFYG&version=25.0), [GDELT](https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/), [WIKI](https://www.wikidata.org/wiki/Wikidata:Main_Page), and [YAGO](https://www.mpi-inf.mpg.de/departments/databases-and-information-systems/research/yago-naga/yago/).
 Each data folder has 'stat.txt', 'train.txt', 'valid.txt', 'test.txt', 'get_history.py', and 'get_history_graph.py'.
 - 'get_history.py': This is for getting history for model 0, 1, and 2.
 - 'get_history_graph.py': This is for getting history and graph for model 3.
