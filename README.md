@@ -2,7 +2,11 @@
 
 Paper: [Recurrent Event Network for Reasoning over Temporal Knowledge Graph](https://arxiv.org/abs/1904.05530)
 
-<!-- [ICLR Workshop on Representation Learning on Graphs and Manifolds](https://rlgm.github.io), 2019. -->
+This repository contains the implementation of the RE-Net architectures described in the paper.
+
+<img src="figs/renet.pdf" width="400" align="middle"/>
+
+Recently, there has been a surge of interest in learning representation of graph-structured data that are dynamically evolving. However, current dynamic graph learning methods lack a principled way in modeling temporal, multi-relational, and concurrent interactions between nodes—a limitation that is especially problematic for the task of temporal knowledge graph reasoning, where the goal is to predict unseen entity relationships (i.e., events) over time. Here we present Recurrent Event Network (RE-Net)—a novel neural architecture for modeling complex event sequences—which consists of a recurrent event encoder and a neighborhood aggregator.
 
 ## Installation
 Install PyTorch (>= 0.4.0) and DGL following the instuctions on the [PyTorch](https://pytorch.org/) and [DGL](https://www.dgl.ai).
