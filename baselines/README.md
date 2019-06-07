@@ -12,12 +12,12 @@
     
     use `preprocess_TA_step1.py` and `preprocess_TA_step2.py` to make data for TATransE and TADistMult.
     ```
-    python preprocess_TA_step1.py ICEWS18
-    python preprocess_TA_step2.py ICEWS18
+    python3 preprocess_TA_step1.py ICEWS18
+    python3 preprocess_TA_step2.py ICEWS18
     ```  
     use `preprocess_TTransE.py` to make data for TTransE.  
     ```
-    python preprocess_TTransE.py ICEWS18
+    python3 preprocess_TTransE.py ICEWS18
     ```
 
 - data.py: this is for corrupting triples and includes other functions for data
@@ -30,12 +30,12 @@
 
 - You can run the code with
 	```
-	python TTransE.py (-- parameters)
-	python TATransE.py
-	python TADistMult.py
+	python3 TTransE.py (-- parameters)
+	python3 TATransE.py
+	python3 TADistMult.py
 	```
 	e.g.:
 	```
-	CUDA_VISIBLE_DEVICES=0 python TTransE.py -f 1 -d ICEWS18 -L 1 -bs 1024 -n 1000
+	CUDA_VISIBLE_DEVICES=0 python3 TTransE.py -f 1 -d ICEWS18 -L 1 -bs 1024 -n 1000
 	```
 
