@@ -71,7 +71,14 @@ We use the following public codes for baselines and hyperparameters. We validate
 | HyTE        | [Link](https://github.com/malllabiisc/HyTE)                               | 128            | Default    |
 
 
-We implemented TA-TransE, TA-DistMult, and TTransE. The user can find implementations in the 'baselines' folder.
+We implemented TA-TransE, TA-DistMult, and TTransE. The user can run the baselines by the following command.
+
+	```
+	cd ./baselines
+	CUDA_VISIBLE_DEVICES=0 python TA-TransE.py -f 1 -d ICEWS18 -L 1 -bs 1024 -n 1000
+	```
+
+The user can find implementations in the 'baselines' folder.
 
 ## Predictive performances
 In the **ICEWS18** dataset, the results with **filtered** metrics:
