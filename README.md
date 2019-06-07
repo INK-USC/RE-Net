@@ -4,7 +4,7 @@ Paper: [Recurrent Event Network for Reasoning over Temporal Knowledge Graph](htt
 
 This repository contains the implementation of the RE-Net architectures described in the paper.
 
-<img src="figs/renet.png" width="400" align="middle"/>
+<p align="center"><img src="figs/renet.png" width="400"/></p>
 
 Recently, there has been a surge of interest in learning representation of graph-structured data that are dynamically evolving. However, current dynamic graph learning methods lack a principled way in modeling temporal, multi-relational, and concurrent interactions between nodes—a limitation that is especially problematic for the task of temporal knowledge graph reasoning, where the goal is to predict unseen entity relationships (i.e., events) over time. Here we present Recurrent Event Network (RE-Net)—a novel neural architecture for modeling complex event sequences—which consists of a recurrent event encoder and a neighborhood aggregator.
 
