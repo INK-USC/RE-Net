@@ -62,13 +62,13 @@ We use the following public codes for baselines and hyperparameters. We validate
 
 | Baselines   | Code                                                                      | Embedding size | Batch size |
 |-------------|---------------------------------------------------------------------------|----------------|------------|
-| TransE      | [Link](https://github.com/jimmywangheng/knowledge_representation_pytorch) | 100, 200       | 1024       |
-| DistMult    | [Link](https://github.com/jimmywangheng/knowledge_representation_pytorch) | 100, 200       | 1024       |
-| ComplEx     | [Link](https://github.com/thunlp/OpenKE)                                  | 50, 100, 200   | 100        |
-| RGCN        | [Link](https://github.com/dmlc/dgl/tree/master/examples/pytorch/rgcn)     | 200            | Default    |
-| ConvE       | [Link](https://github.com/TimDettmers/ConvE)                              | 200            | 128        |
-| Know-Evolve | [Link](https://github.com/rstriv/Know-Evolve)                             | Default        | Default    |
-| HyTE        | [Link](https://github.com/malllabiisc/HyTE)                               | 128            | Default    |
+| TransE ([Bordes et al., 2013](https://papers.nips.cc/paper/5071-translating-embeddings-for-modeling-multi-relational-data))      | [Link](https://github.com/jimmywangheng/knowledge_representation_pytorch) | 100, 200       | 1024       |
+| DistMult ([Yang et al., 2015](http://scottyih.org/files/ICLR2015_updated.pdf))   | [Link](https://github.com/jimmywangheng/knowledge_representation_pytorch) | 100, 200       | 1024       |
+| ComplEx ([Trouillon et al., 2016](http://proceedings.mlr.press/v48/trouillon16.pdf))    | [Link](https://github.com/thunlp/OpenKE)                                  | 50, 100, 200   | 100        |
+| RGCN ([Schlichtkrull et al., 2018](https://arxiv.org/pdf/1703.06103))      | [Link](https://github.com/dmlc/dgl/tree/master/examples/pytorch/rgcn)     | 200            | Default    |
+| ConvE ([Dettmers et al., 2018](https://arxiv.org/pdf/1707.01476.pdf))      | [Link](https://github.com/TimDettmers/ConvE)                              | 200            | 128        |
+| Know-Evolve ([Trivedi et al., 2017](https://arxiv.org/pdf/1705.05742)) | [Link](https://github.com/rstriv/Know-Evolve)                             | Default        | Default    |
+| HyTE ([Dasgupta et al., 2018](http://talukdar.net/papers/emnlp2018_HyTE.pdf))        | [Link](https://github.com/malllabiisc/HyTE)                               | 128            | Default    |
 
 
 We implemented TA-TransE, TA-DistMult, and TTransE. The user can run the baselines by the following command.

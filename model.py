@@ -235,8 +235,6 @@ class RENet(nn.Module):
         if self.model == 3:
             self.s_his_cache[s] = self.update_cache(self.s_his_cache[s], r, o_candidate)
             self.o_his_cache[o] = self.update_cache(self.o_his_cache[o], r, s_candidate)
-            loss_sub = self.criterion(ob_pred.view(1, -1), o.view(-1))
-            loss_ob = self.criterion(sub_pred.view(1, -1), s.view(-1))
             self.s_his_cache_t[s] = t.item()
             self.o_his_cache_t[o] = t.item()
         else:
