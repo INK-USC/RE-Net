@@ -11,12 +11,12 @@ Recently, there has been a surge of interest in learning representation of graph
 If you make use of this code or the RE-Net algorithm in your work, please cite the following paper:
 
 ```bibtex
-	@article{jin2019recurrent,
-  		title={Recurrent Event Network for Reasoning over Temporal Knowledge Graphs},
-  		author={Jin, Woojeong and Jiang, He and Zhang, Changlin and Szekely, Pedro and Ren, Xiang},
-  		journal={arXiv preprint arXiv:1904.05530},
-  		year={2019}
-	}
+@article{jin2019recurrent,
+	title={Recurrent Event Network for Reasoning over Temporal Knowledge Graphs},
+	author={Jin, Woojeong and Jiang, He and Zhang, Changlin and Szekely, Pedro and Ren, Xiang},
+	journal={arXiv preprint arXiv:1904.05530},
+	year={2019}
+}
 ```
 
 ## Quick Links
