@@ -8,6 +8,25 @@ This repository contains the implementation of the RE-Net architectures describe
 
 Recently, there has been a surge of interest in learning representation of graph-structured data that are dynamically evolving. However, current dynamic graph learning methods lack a principled way in modeling temporal, multi-relational, and concurrent interactions between nodes—a limitation that is especially problematic for the task of temporal knowledge graph reasoning, where the goal is to predict unseen entity relationships (i.e., events) over time. Here we present Recurrent Event Network (RE-Net)—a novel neural architecture for modeling complex event sequences—which consists of a recurrent event encoder and a neighborhood aggregator.
 
+If you make use of this code or the RE-Net algorithm in your work, please cite the following paper:
+
+```bibtex
+	@article{jin2019recurrent,
+  		title={Recurrent Event Network for Reasoning over Temporal Knowledge Graphs},
+  		author={Jin, Woojeong and Jiang, He and Zhang, Changlin and Szekely, Pedro and Ren, Xiang},
+  		journal={arXiv preprint arXiv:1904.05530},
+  		year={2019}
+	}
+```
+
+## Quick Links
+- [Installation](#Installation)
+- [Train and Test](#Train-and-Test)
+- [Related Work](#Related-Work)
+- [Datasets](#Datasets)
+- [Baselines](#Baselines)
+- [Predictive Performances](#Predictive-performances)
+
 ## Installation
 Install PyTorch (>= 0.4.0) and DGL following the instuctions on the [PyTorch](https://pytorch.org/) and [DGL](https://www.dgl.ai).
 Our code is written in Python3.
@@ -80,11 +99,14 @@ CUDA_VISIBLE_DEVICES=0 python3 TA-TransE.py -f 1 -d ICEWS18 -L 1 -bs 1024 -n 100
 
 The user can find implementations in the 'baselines' folder.
 
-## Predictive performances
+## Predictive Performances
 In the **ICEWS18** dataset, the results with **filtered** metrics:
 
 | Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
 |---------------|-------|--------|--------|---------|
+| TransE        | 17.56 | 2.48   | 26.95  | 43.87   |
+| ConvE         | 37.67 | 29.91  | 40.80  | 51.69   |
+| TA-DistMult   | 28.53 | 20.30  | 31.57  | 44.96
 | RE-Net (mean) | 42.38 | 35.80  | 44.99  | 54.90   |
 | RE-Net (attn) | 41.46 | 34.67  | 44.19  | 54.44   |
 | RE-Net (pool) | 41.35 | 34.53  | 44.05  | 54.35   |
@@ -94,6 +116,9 @@ In the **GDELT** dataset, the results with **filtered** metrics:
 
 | Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
 |---------------|-------|--------|--------|---------|
+| TransE        | 16.05 | 0.00   | 26.10  | 42.29   |
+| ConvE         | 36.99 | 28.05  | 40.32  | 50.44   |
+| TA-DistMult   | 29.35 | 22.11  | 31.56  | 41.39   |
 | RE-Net (mean) | 39.15 | 30.84  | 43.07  | 53.48   |
 | RE-Net (attn) | 38.07 | 29.44  | 42.26  | 52.93   |
 | RE-Net (pool) | 37.99 | 30.05  | 41.40  | 52.18   |
@@ -103,6 +128,9 @@ In the **WIKI** dataset, the results with **filtered** metrics:
 
 | Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
 |---------------|-------|--------|--------|---------|
+| TransE        | 19.30 | 14.01  | 24.01  | 25.82   |
+| ConvE         | 49.57 | 48.23  | 51.07  | 52.53   |
+| TA-DistMult   | 48.09 | 46.01  | 49.51  | 51.70   |
 | RE-Net (mean) | 48.30 | 45.86  | 49.36  | 53.03   |
 | RE-Net (attn) | 51.72 | 50.60  | 52.12  | 53.72   |
 | RE-Net (pool) | 45.15 | 41.41  | 46.98  | 52.57   |
@@ -112,6 +140,9 @@ In the **YAGO** dataset, the results with **filtered** metrics:
 
 | Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
 |---------------|-------|--------|--------|---------|
+| TransE        | 34.78 | 20.27  | 47.23  | 53.35   |
+| ConvE         | 64.32 | 63.79  | 65.97  | 67.60   |
+| TA-DistMult   | 62.72 | 59.30  | 64.94  | 68.19   |
 | RE-Net (mean) | 65.51 | 63.85  | 66.06  | 68.03   |
 | RE-Net (attn) | 65.79 | 64.50  | 66.00  | 67.82   |
 | RE-Net (pool) | 63.65 | 61.25  | 64.76  | 67.45   |
