@@ -40,9 +40,9 @@ def test(args):
         model.cuda()
 
     if args.model == 3:
-        with open('../data/' + args.dataset+'/test_history_sub.txt', 'rb') as f:
+        with open('data/' + args.dataset+'/test_history_sub.txt', 'rb') as f:
             s_history_test_data = pickle.load(f)
-        with open('../data/' + args.dataset+'/test_history_ob.txt', 'rb') as f:
+        with open('data/' + args.dataset+'/test_history_ob.txt', 'rb') as f:
             o_history_test_data = pickle.load(f)
 
         s_history_test = s_history_test_data[0]
@@ -50,9 +50,9 @@ def test(args):
         o_history_test = o_history_test_data[0]
         o_history_test_t = o_history_test_data[1]
     else:
-        with open('./data/' + args.dataset+'/test_history_sub1.txt', 'rb') as f:
+        with open('data/' + args.dataset+'/test_history_sub1.txt', 'rb') as f:
             s_history_test = pickle.load(f)
-        with open('./data/' + args.dataset+'/test_history_ob1.txt', 'rb') as f:
+        with open('data/' + args.dataset+'/test_history_ob1.txt', 'rb') as f:
             o_history_test = pickle.load(f)
 
 
@@ -107,7 +107,7 @@ def test(args):
         with torch.no_grad():
             # Filtered metric
             if args.model == 3:
-                anks_filter, loss = model.evaluate_filter(batch_data, (s_hist,s_hist_t), (o_hist,o_hist_t), total_data)
+                ranks_filter, loss = model.evaluate_filter(batch_data, (s_hist,s_hist_t), (o_hist,o_hist_t), total_data)
             else:
                 ranks_filter, loss = model.evaluate_filter(batch_data, s_hist, o_hist, total_data)
 

@@ -36,12 +36,14 @@ Before running, you should preprocess datasets.
 
 For attentive, mean, pooling aggregators (model 0,1,2)
 ```bash
-python3 data/DATA_NAME/get_history.py
+cd data/DATA_NAME
+python3 get_history.py
 ```
 
 For an RGCN aggregator (model 3)
 ```bash
-python3 data/DATA_NAME/get_history_graph.py
+cd data/DATA_NAME
+python3 get_history_graph.py
 ```
 
 Then, we are ready to train and test.

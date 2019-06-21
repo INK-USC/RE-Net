@@ -25,6 +25,7 @@ def train(args):
         torch.cuda.set_device(args.gpu)
 
     os.makedirs('models', exist_ok=True)
+    os.makedirs('models/'+ args.dataset, exist_ok=True)
     if args.model == 0:
         model_state_file = 'models/' + args.dataset + 'attn.pth'
     elif args.model == 1:
