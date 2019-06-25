@@ -76,7 +76,7 @@ Each data folder has 'stat.txt', 'train.txt', 'valid.txt', 'test.txt', 'get_hist
 - 'get_history.py': This is for getting history for model 0, 1, and 2.
 - 'get_history_graph.py': This is for getting history and graph for model 3.
 - 'stat.txt': First value is the number of entities, and second value is the number of relations.
-- 'train.txt', 'valid.txt', 'test.txt': First column is subject entities, second column is relations, and third column is object entities. The fourth column is time.
+- 'train.txt', 'valid.txt', 'test.txt': First column is subject entities, second column is relations, and third column is object entities. The fourth column is time. The fifth column is for know-evolve's data format. It is ignored in RE-Net.
 
 ## Baselines
 We use the following public codes for baselines and hyperparameters. We validated embedding sizes among presented values.
