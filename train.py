@@ -105,6 +105,8 @@ def train(args):
         t0 = time.time()
 
         if args.model == 3:
+            train_data, s_history, s_history_t, o_history, o_history_t = shuffle(train_data, s_history, s_history_t,
+                                                                                 o_history, o_history_t)
             for batch_data, s_hist, s_hist_t, o_hist, o_hist_t in utils.make_batch2(train_data, s_history, s_history_t,
                                                                                    o_history, o_history_t, args.batch_size):
 
@@ -119,6 +121,7 @@ def train(args):
                 loss_epoch += loss.item()
 
         else:
+            train_data, s_history, o_history = shuffle(train_data, s_history, o_history)
             for batch_data, s_hist, o_hist in utils.make_batch(train_data, s_history, o_history, args.batch_size):
                 batch_data = torch.from_numpy(batch_data)
                 if use_cuda:
