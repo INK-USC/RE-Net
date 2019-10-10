@@ -4,7 +4,7 @@ Paper: [Recurrent Event Network: Global Structure Inference over Temporal Knowle
 
 This repository contains the implementation of the RE-Net architectures described in the paper.
 
-<p align="center"><img src="figs/renet.png" width="400"/></p>
+<p align="center"><img src="figs/renet.png" width="500"/></p>
 
 Modeling dynamically-evolving, multi-relational graph data has received a surge of interests with the rapid growth of heterogeneous event data. However, predicting future events on such data requires global structure inference over time and the ability to integrate temporal and structural information, which are not yet well understood. We present Recurrent Event Network (RE-Net), a novel autoregressive architecture for modeling temporal sequences of multi-relational graphs (e.g., temporal knowledge graph), which can perform sequential, global structure inference over future time stamps to predict new events. RE-Net employs a recurrent event encoder to model the temporally conditioned joint probability distribution for the event sequences, and equips the event encoder with a neighborhood aggregator for modeling the concurrent events within a time window associated with each entity. We apply teacher forcing for model training over historical data, and infer graph sequences over future time stamps by sampling from the learned joint distribution in a sequential manner. 
 
