@@ -113,9 +113,8 @@ def test(args):
         batch_data = test_data[i]
         s_hist = s_history_test[i]
         o_hist = o_history_test[i]
-        if args.model == 3:
-            s_hist_t = s_history_test_t[i]
-            o_hist_t = o_history_test_t[i]
+        s_hist_t = s_history_test_t[i]
+        o_hist_t = o_history_test_t[i]
         if latest_time != batch_data[3]:
             ranks.append(total_ranks_filter)
             latest_time = batch_data[3]

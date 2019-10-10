@@ -12,7 +12,7 @@ If you make use of this code or the RE-Net algorithm in your work, please cite t
 
 ```bibtex
 @article{jin2019recurrent,
-	title={Recurrent Event Network for Reasoning over Temporal Knowledge Graphs},
+	title={Recurrent Event Network: Global Structure Inference over Temporal Knowledge Graph},
 	author={Jin, Woojeong and Jiang, He and Qu, Meng and Chen, Tong and Zhang, Changlin and Szekely, Pedro and Ren, Xiang},
 	journal={arXiv preprint arXiv:1904.05530},
 	year={2019}
@@ -33,7 +33,7 @@ Our code is written in Python3.
 
 ## Train and Test
 Before running, the user should preprocess datasets.
-In this code, RENet with RGCN aggregator is included. 
+In this code, RE-Net with RGCN aggregator is included. 
 
 <!-- For attentive, mean, pooling aggregators (model 0,1,2)
 ```bash

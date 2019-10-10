@@ -67,40 +67,26 @@ def train(args):
         t0 = time.time()
         # print(graph_dict.keys())
         # print(train_times_origin)
-        if args.model == 3:
-            train_times, true_prob_s, true_prob_o = shuffle(train_times_origin, true_prob_s, true_prob_o)
 
-            for batch_data, true_s, true_o in utils.make_batch(train_times, true_prob_s, true_prob_o, args.batch_size):
+        train_times, true_prob_s, true_prob_o = shuffle(train_times_origin, true_prob_s, true_prob_o)
 
-                batch_data = torch.from_numpy(batch_data)
-                true_s = torch.from_numpy(true_s)
-                true_o = torch.from_numpy(true_o)
-                if use_cuda:
-                    batch_data = batch_data.cuda()
-                    true_s = true_s.cuda()
-                    true_o = true_o.cuda()
+        for batch_data, true_s, true_o in utils.make_batch(train_times, true_prob_s, true_prob_o, args.batch_size):
 
-                loss = model(batch_data, true_s, true_o, graph_dict)
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_norm)  # clip gradients
-                optimizer.step()
-                optimizer.zero_grad()
-                loss_epoch += loss.item()
+            batch_data = torch.from_numpy(batch_data)
+            true_s = torch.from_numpy(true_s)
+            true_o = torch.from_numpy(true_o)
+            if use_cuda:
+                batch_data = batch_data.cuda()
+                true_s = true_s.cuda()
+                true_o = true_o.cuda()
 
-        else:
-            train_data, s_history, o_history = shuffle(train_data, s_history, o_history)
-            for batch_data, s_hist, o_hist in utils.make_batch(train_data, s_history, o_history, args.batch_size):
-                batch_data = torch.from_numpy(batch_data)
-                if use_cuda:
-                    batch_data = batch_data.cuda()
+            loss = model(batch_data, true_s, true_o, graph_dict)
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_norm)  # clip gradients
+            optimizer.step()
+            optimizer.zero_grad()
+            loss_epoch += loss.item()
 
-                loss = model.get_loss(batch_data, s_hist, o_hist, None)
-
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_norm)  # clip gradients
-                optimizer.step()
-                optimizer.zero_grad()
-                loss_epoch += loss.item()
 
         t3 = time.time()
         model.global_emb = model.get_global_emb(train_times_origin, graph_dict)
@@ -140,7 +126,7 @@ if __name__ == '__main__':
     parser.add_argument("--max-epochs", type=int, default=100
                         ,
                         help="maximum epochs")
-    parser.add_argument("--model", type=int, default=3)
+    parser.add_argument("--model", type=int, default=0)
     parser.add_argument("--seq-len", type=int, default=10)
     parser.add_argument("--num-k", type=int, default=10,
                         help="cuttoff position")

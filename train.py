@@ -67,33 +67,28 @@ def train(args):
     if use_cuda:
         model.cuda()
         global_model.cuda()
-    if args.model == 3:
-        train_sub = '/train_history_sub.txt'
-        train_ob = '/train_history_ob.txt'
-        if args.dataset == 'icews_know':
-            valid_sub = '/test_history_sub.txt'
-            valid_ob = '/test_history_ob.txt'
-        else:
-            valid_sub = '/dev_history_sub.txt'
-            valid_ob = '/dev_history_ob.txt'
-        with open('./data/' + args.dataset+'/train_graphs.txt', 'rb') as f:
-            graph_dict = pickle.load(f)
-        model.graph_dict = graph_dict
-
-        with open('data/' + args.dataset+'/test_history_sub.txt', 'rb') as f:
-            s_history_test_data = pickle.load(f)
-        with open('data/' + args.dataset+'/test_history_ob.txt', 'rb') as f:
-            o_history_test_data = pickle.load(f)
-
-        s_history_test = s_history_test_data[0]
-        s_history_test_t = s_history_test_data[1]
-        o_history_test = o_history_test_data[0]
-        o_history_test_t = o_history_test_data[1]
+    train_sub = '/train_history_sub.txt'
+    train_ob = '/train_history_ob.txt'
+    if args.dataset == 'icews_know':
+        valid_sub = '/test_history_sub.txt'
+        valid_ob = '/test_history_ob.txt'
     else:
-        train_sub = '/train_history_sub1.txt'
-        train_ob = '/train_history_ob1.txt'
-        valid_sub = '/dev_history_sub1.txt'
-        valid_ob = '/dev_history_ob1.txt'
+        valid_sub = '/dev_history_sub.txt'
+        valid_ob = '/dev_history_ob.txt'
+    with open('./data/' + args.dataset+'/train_graphs.txt', 'rb') as f:
+        graph_dict = pickle.load(f)
+    model.graph_dict = graph_dict
+
+    with open('data/' + args.dataset+'/test_history_sub.txt', 'rb') as f:
+        s_history_test_data = pickle.load(f)
+    with open('data/' + args.dataset+'/test_history_ob.txt', 'rb') as f:
+        o_history_test_data = pickle.load(f)
+
+    s_history_test = s_history_test_data[0]
+    s_history_test_t = s_history_test_data[1]
+    o_history_test = o_history_test_data[0]
+    o_history_test_t = o_history_test_data[1]
+
     with open('./data/' + args.dataset+train_sub, 'rb') as f:
         s_history_data = pickle.load(f)
     with open('./data/' + args.dataset+train_ob, 'rb') as f:
@@ -167,18 +162,14 @@ def train(args):
                 batch_data = valid_data[i]
                 s_hist = s_history_valid[i]
                 o_hist = o_history_valid[i]
-                if args.model == 3:
-                    s_hist_t = s_history_valid_t[i]
-                    o_hist_t = o_history_valid_t[i]
+                s_hist_t = s_history_valid_t[i]
+                o_hist_t = o_history_valid_t[i]
 
                 if use_cuda:
                     batch_data = batch_data.cuda()
 
                 with torch.no_grad():
-                    if args.model == 3:
-                        ranks, loss = model.evaluate_filter(batch_data, (s_hist, s_hist_t), (o_hist, o_hist_t), global_model, total_data)
-                    else:
-                        ranks, loss = model.evaluate_filter(batch_data, s_hist, o_hist, total_data, global_model)
+                    ranks, loss = model.evaluate_filter(batch_data, (s_hist, s_hist_t), (o_hist, o_hist_t), global_model, total_data)
                     total_ranks = np.concatenate((total_ranks, ranks))
                     total_loss += loss.item()
 

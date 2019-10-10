@@ -77,17 +77,12 @@ class RENet(nn.Module):
             hist = o_hist
             reverse = True
 
-        if self.model == 3:
-            hist_len = torch.LongTensor(list(map(len, hist[0]))).cuda()
-            s_len, s_idx = hist_len.sort(0, descending=True)
-            s_packed_input, s_packed_input_r = self.aggregator(hist, s, r, self.ent_embeds,
-                                                               rel_embeds, graph_dict, self.global_emb,
-                                                               reverse=reverse)
-        else:
-            hist_len = torch.LongTensor(list(map(len, hist))).cuda()
-            s_len, s_idx = hist_len.sort(0, descending=True)
-            s_packed_input = self.aggregator(hist, s, r, self.ent_embeds, rel_embeds)
-
+        hist_len = torch.LongTensor(list(map(len, hist[0]))).cuda()
+        s_len, s_idx = hist_len.sort(0, descending=True)
+        s_packed_input, s_packed_input_r = self.aggregator(hist, s, r, self.ent_embeds,
+                                                        rel_embeds, graph_dict, self.global_emb,
+                                                        reverse=reverse)
+   
         tt, s_h = self.encoder(s_packed_input)
         s_h = s_h.squeeze()
         s_h = torch.cat((s_h, torch.zeros(len(s) - len(s_h), self.h_dim).cuda()), dim=0)
@@ -115,20 +110,15 @@ class RENet(nn.Module):
         o_hist = o_history[0]
         o_hist_t = o_history[1]
 
-        if self.model == 3:
-            self.s_hist_test = [[] for _ in range(self.in_dim)]
-            self.o_hist_test = [[] for _ in range(self.in_dim)]
-            self.s_hist_test_t = [[] for _ in range(self.in_dim)]
-            self.o_hist_test_t = [[] for _ in range(self.in_dim)]
-            self.s_his_cache = [[] for _ in range(self.in_dim)]
-            self.o_his_cache = [[] for _ in range(self.in_dim)]
-            self.s_his_cache_t = [None for _ in range(self.in_dim)]
-            self.o_his_cache_t = [None for _ in range(self.in_dim)]
-        else:
-            self.s_hist_test = [[[] for _ in range(self.num_rels)] for _ in range(self.in_dim)]
-            self.o_hist_test = [[[] for _ in range(self.num_rels)] for _ in range(self.in_dim)]
-            self.s_his_cache = [[[] for _ in range(self.num_rels)] for _ in range(self.in_dim)]
-            self.o_his_cache = [[[] for _ in range(self.num_rels)] for _ in range(self.in_dim)]
+
+        self.s_hist_test = [[] for _ in range(self.in_dim)]
+        self.o_hist_test = [[] for _ in range(self.in_dim)]
+        self.s_hist_test_t = [[] for _ in range(self.in_dim)]
+        self.o_hist_test_t = [[] for _ in range(self.in_dim)]
+        self.s_his_cache = [[] for _ in range(self.in_dim)]
+        self.o_his_cache = [[] for _ in range(self.in_dim)]
+        self.s_his_cache_t = [None for _ in range(self.in_dim)]
+        self.o_his_cache_t = [None for _ in range(self.in_dim)]
 
         for triple, s_his, s_his_t, o_his, o_his_t in zip(triples, s_hist, s_hist_t, o_hist, o_hist_t):
             s = triple[0]
@@ -228,175 +218,137 @@ class RENet(nn.Module):
         r = triplet[1]
         o = triplet[2]
         t = triplet[3].cpu()
-        # print(t)
-        if self.model == 3:
-            if self.latest_time != t:
-                # print(t, self.latest_time.item())
-                global_emb_prev_t, sub, prob_sub = global_model.predict(t, self.graph_dict, subject=True)
-                self.global_emb[self.latest_time.item()] = global_emb_prev_t
-                m = torch.distributions.categorical.Categorical(prob_sub)
-                subjects = m.sample(torch.Size([self.num_k]))
-                prob_subjects = prob_sub[subjects]
 
-                s_done = set()
+        if self.latest_time != t:
+            # print(t, self.latest_time.item())
+            global_emb_prev_t, sub, prob_sub = global_model.predict(t, self.graph_dict, subject=True)
+            self.global_emb[self.latest_time.item()] = global_emb_prev_t
+            m = torch.distributions.categorical.Categorical(prob_sub)
+            subjects = m.sample(torch.Size([self.num_k]))
+            prob_subjects = prob_sub[subjects]
 
-                for s, prob_s in zip(subjects, prob_subjects):
-                    if s in s_done:
-                        continue
-                    else:
-                        s_done.add(s)
-                    ss = torch.LongTensor([s]).repeat(self.num_rels)
-                    rr = torch.arange(0,self.num_rels)
-                    probs = prob_s * self.pred_r_rank2(ss, rr, subject=True)
-                    probs, indices = torch.topk(probs.view(-1), self.num_k, sorted=False)
-                    self.preds_list_s[s] = probs.view(-1)
-                    self.preds_ind_s[s] = indices.view(-1)
-                s_to_id = dict()
-                s_num = len(self.preds_list_s.keys())
-                prob_tensor = torch.zeros(s_num * self.num_k)
-                idx = 0
-                for i, s in enumerate(self.preds_list_s.keys()):
-                    s_to_id[idx] = s
-                    prob_tensor[i * self.num_k: (i + 1) * self.num_k] = self.preds_list_s[s]
-                    idx += 1
-                _, triple_candidates = torch.topk(prob_tensor, self.num_k, sorted=False)
-                indices = triple_candidates // self.num_k
-                for i,idx in enumerate(indices):
-                    s = s_to_id[idx.item()]
-                    num_r_num_s = self.preds_ind_s[s][triple_candidates[i] % self.num_k]
-                    rr = num_r_num_s // self.in_dim
-                    o_s = num_r_num_s % self.in_dim
-                    self.s_his_cache[s] = self.update_cache(self.s_his_cache[s], rr, o_s.view(-1, 1))
-                    self.s_his_cache_t[s] = self.latest_time.item()
+            s_done = set()
 
-
-                _, ob, prob_ob = global_model.predict(t, self.graph_dict, subject=False)
-                prob_ob = torch.softmax(ob.view(-1), dim=0)
-                m = torch.distributions.categorical.Categorical(prob_ob)
-                objects = m.sample(torch.Size([self.num_k]))
-                prob_objects = prob_ob[objects]
-
-                o_done = set()
-                for o, prob_o in zip(objects, prob_objects):
-                    if o in o_done:
-                        continue
-                    else:
-                        o_done.add(o)
-                    oo = torch.LongTensor([o]).repeat(self.num_rels)
-                    rr = torch.arange(0, self.num_rels)
-                    probs = prob_o * self.pred_r_rank2(oo, rr, subject=False)
-                    probs, indices = torch.topk(probs.view(-1), self.num_k, sorted=False)
-                    self.preds_list_o[o] = probs.view(-1)
-                    self.preds_ind_o[o] = indices.view(-1)
-                o_to_id = dict()
-                o_num = len(self.preds_list_o.keys())
-
-                prob_tensor = torch.zeros(o_num * self.num_k)
-                idx = 0
-                for i, o in enumerate(self.preds_list_o.keys()):
-                    o_to_id[idx] = o
-                    prob_tensor[i * self.num_k: (i + 1) * self.num_k] = self.preds_list_o[o]
-                    idx += 1
-                _, triple_candidates = torch.topk(prob_tensor, self.num_k, sorted=False)
-                indices = triple_candidates // self.num_k
-                for i, idx in enumerate(indices):
-                    o = o_to_id[idx.item()]
-                    num_r_num_o = self.preds_ind_o[o][triple_candidates[i] % self.num_k]
-                    rr = num_r_num_o // self.in_dim
-                    s_o = num_r_num_o % self.in_dim
-                    # rr = torch.tensor(rr)
-                    self.o_his_cache[o] = self.update_cache(self.o_his_cache[o], rr, s_o.view(-1, 1))
-                    self.o_his_cache_t[o] = self.latest_time.item()
+            for s, prob_s in zip(subjects, prob_subjects):
+                if s in s_done:
+                    continue
+                else:
+                    s_done.add(s)
+                ss = torch.LongTensor([s]).repeat(self.num_rels)
+                rr = torch.arange(0,self.num_rels)
+                probs = prob_s * self.pred_r_rank2(ss, rr, subject=True)
+                probs, indices = torch.topk(probs.view(-1), self.num_k, sorted=False)
+                self.preds_list_s[s] = probs.view(-1)
+                self.preds_ind_s[s] = indices.view(-1)
+            s_to_id = dict()
+            s_num = len(self.preds_list_s.keys())
+            prob_tensor = torch.zeros(s_num * self.num_k)
+            idx = 0
+            for i, s in enumerate(self.preds_list_s.keys()):
+                s_to_id[idx] = s
+                prob_tensor[i * self.num_k: (i + 1) * self.num_k] = self.preds_list_s[s]
+                idx += 1
+            _, triple_candidates = torch.topk(prob_tensor, self.num_k, sorted=False)
+            indices = triple_candidates // self.num_k
+            for i,idx in enumerate(indices):
+                s = s_to_id[idx.item()]
+                num_r_num_s = self.preds_ind_s[s][triple_candidates[i] % self.num_k]
+                rr = num_r_num_s // self.in_dim
+                o_s = num_r_num_s % self.in_dim
+                self.s_his_cache[s] = self.update_cache(self.s_his_cache[s], rr, o_s.view(-1, 1))
+                self.s_his_cache_t[s] = self.latest_time.item()
 
 
-                self.data = get_data(self.s_his_cache, self.o_his_cache)
-                self.graph_dict[self.latest_time.item()] = get_big_graph(self.data, self.num_rels)
+            _, ob, prob_ob = global_model.predict(t, self.graph_dict, subject=False)
+            prob_ob = torch.softmax(ob.view(-1), dim=0)
+            m = torch.distributions.categorical.Categorical(prob_ob)
+            objects = m.sample(torch.Size([self.num_k]))
+            prob_objects = prob_ob[objects]
 
-                for ee in range(self.in_dim):
-                    if len(self.s_his_cache[ee]) != 0:
-                        while len(self.s_hist_test[ee]) >= self.seq_len:
-                            self.s_hist_test[ee].pop(0)
-                            self.s_hist_test_t[ee].pop(0)
-                        self.s_hist_test[ee].append(self.s_his_cache[ee].cpu().numpy().copy())
-                        self.s_hist_test_t[ee].append(self.s_his_cache_t[ee])
-                        self.s_his_cache[ee] = []
-                        self.s_his_cache_t[ee] = None
-                    if len(self.o_his_cache[ee]) != 0:
-                        while len(self.o_hist_test[ee]) >= self.seq_len:
-                            self.o_hist_test[ee].pop(0)
-                            self.o_hist_test_t[ee].pop(0)
-                        self.o_hist_test[ee].append(self.o_his_cache[ee].cpu().numpy().copy())
-                        self.o_hist_test_t[ee].append(self.o_his_cache_t[ee])
-                        self.o_his_cache[ee] = []
-                        self.o_his_cache_t[ee] = None
+            o_done = set()
+            for o, prob_o in zip(objects, prob_objects):
+                if o in o_done:
+                    continue
+                else:
+                    o_done.add(o)
+                oo = torch.LongTensor([o]).repeat(self.num_rels)
+                rr = torch.arange(0, self.num_rels)
+                probs = prob_o * self.pred_r_rank2(oo, rr, subject=False)
+                probs, indices = torch.topk(probs.view(-1), self.num_k, sorted=False)
+                self.preds_list_o[o] = probs.view(-1)
+                self.preds_ind_o[o] = indices.view(-1)
+            o_to_id = dict()
+            o_num = len(self.preds_list_o.keys())
 
-                self.latest_time = t
-                self.data = None
-                self.preds_list_s = defaultdict(lambda: torch.zeros(self.num_k))
-                self.preds_ind_s = defaultdict(lambda: torch.zeros(self.num_k))
-                self.preds_list_o = defaultdict(lambda: torch.zeros(self.num_k))
-                self.preds_ind_o = defaultdict(lambda: torch.zeros(self.num_k))
+            prob_tensor = torch.zeros(o_num * self.num_k)
+            idx = 0
+            for i, o in enumerate(self.preds_list_o.keys()):
+                o_to_id[idx] = o
+                prob_tensor[i * self.num_k: (i + 1) * self.num_k] = self.preds_list_o[o]
+                idx += 1
+            _, triple_candidates = torch.topk(prob_tensor, self.num_k, sorted=False)
+            indices = triple_candidates // self.num_k
+            for i, idx in enumerate(indices):
+                o = o_to_id[idx.item()]
+                num_r_num_o = self.preds_ind_o[o][triple_candidates[i] % self.num_k]
+                rr = num_r_num_o // self.in_dim
+                s_o = num_r_num_o % self.in_dim
+                # rr = torch.tensor(rr)
+                self.o_his_cache[o] = self.update_cache(self.o_his_cache[o], rr, s_o.view(-1, 1))
+                self.o_his_cache_t[o] = self.latest_time.item()
 
+
+            self.data = get_data(self.s_his_cache, self.o_his_cache)
+            self.graph_dict[self.latest_time.item()] = get_big_graph(self.data, self.num_rels)
+
+            for ee in range(self.in_dim):
+                if len(self.s_his_cache[ee]) != 0:
+                    while len(self.s_hist_test[ee]) >= self.seq_len:
+                        self.s_hist_test[ee].pop(0)
+                        self.s_hist_test_t[ee].pop(0)
+                    self.s_hist_test[ee].append(self.s_his_cache[ee].cpu().numpy().copy())
+                    self.s_hist_test_t[ee].append(self.s_his_cache_t[ee])
+                    self.s_his_cache[ee] = []
+                    self.s_his_cache_t[ee] = None
+                if len(self.o_his_cache[ee]) != 0:
+                    while len(self.o_hist_test[ee]) >= self.seq_len:
+                        self.o_hist_test[ee].pop(0)
+                        self.o_hist_test_t[ee].pop(0)
+                    self.o_hist_test[ee].append(self.o_his_cache[ee].cpu().numpy().copy())
+                    self.o_hist_test_t[ee].append(self.o_his_cache_t[ee])
+                    self.o_his_cache[ee] = []
+                    self.o_his_cache_t[ee] = None
+
+            self.latest_time = t
+            self.data = None
+            self.preds_list_s = defaultdict(lambda: torch.zeros(self.num_k))
+            self.preds_ind_s = defaultdict(lambda: torch.zeros(self.num_k))
+            self.preds_list_o = defaultdict(lambda: torch.zeros(self.num_k))
+            self.preds_ind_o = defaultdict(lambda: torch.zeros(self.num_k))
+
+
+
+        if len(s_hist[0]) == 0 or len(self.s_hist_test[s]) == 0:
+            s_h = torch.zeros(self.h_dim).cuda()
         else:
-            if self.latest_time != t:
-                for rr in range(self.num_rels):
-                    for ee in range(self.in_dim):
-                        if len(self.s_his_cache[ee][rr]) != 0:
-                            if len(self.s_hist_test[ee][rr]) >= self.seq_len:
-                                self.s_hist_test[ee][rr].pop(0)
-                            self.s_hist_test[ee][rr].append(self.s_his_cache[ee][rr].clone())
-                            self.s_his_cache[ee][rr] = []
-                        if len(self.o_his_cache[ee][rr]) != 0:
-                            if len(self.o_hist_test[ee][rr]) >= self.seq_len:
-                                self.o_hist_test[ee][rr].pop(0)
-                            self.o_hist_test[ee][rr].append(self.o_his_cache[ee][rr].clone())
 
-                            self.o_his_cache[ee][rr] = []
-                self.latest_time = t
+            s_history = self.s_hist_test[s]
+            s_history_t = self.s_hist_test_t[s]
+            inp, _ = self.aggregator.predict((s_history, s_history_t), s, r, self.ent_embeds, self.rel_embeds[:self.num_rels], self.graph_dict, self.global_emb, reverse=False)
+            tt, s_h = self.encoder(inp.view(1, len(s_history), 4 * self.h_dim))
+            s_h = s_h.squeeze()
 
-        if self.model == 3:
+        if len(o_hist[0]) == 0 or len(self.o_hist_test[o]) == 0:
+            o_h = torch.zeros(self.h_dim).cuda()
+        else:
 
-            if len(s_hist[0]) == 0 or len(self.s_hist_test[s]) == 0:
-                s_h = torch.zeros(self.h_dim).cuda()
-            else:
+            o_history = self.o_hist_test[o]
+            o_history_t = self.o_hist_test_t[o]
+            inp, _ = self.aggregator.predict((o_history, o_history_t), o, r, self.ent_embeds, self.rel_embeds[self.num_rels:], self.graph_dict, self.global_emb, reverse=True)
 
-                s_history = self.s_hist_test[s]
-                s_history_t = self.s_hist_test_t[s]
-                inp, _ = self.aggregator.predict((s_history, s_history_t), s, r, self.ent_embeds, self.rel_embeds[:self.num_rels], self.graph_dict, self.global_emb, reverse=False)
-                tt, s_h = self.encoder(inp.view(1, len(s_history), 4 * self.h_dim))
-                s_h = s_h.squeeze()
-
-            if len(o_hist[0]) == 0 or len(self.o_hist_test[o]) == 0:
-                o_h = torch.zeros(self.h_dim).cuda()
-            else:
-
-                o_history = self.o_hist_test[o]
-                o_history_t = self.o_hist_test_t[o]
-                inp, _ = self.aggregator.predict((o_history, o_history_t), o, r, self.ent_embeds, self.rel_embeds[self.num_rels:], self.graph_dict, self.global_emb, reverse=True)
-
-                tt, o_h = self.encoder(inp.view(1, len(o_history), 4 * self.h_dim))
-                o_h = o_h.squeeze()
+            tt, o_h = self.encoder(inp.view(1, len(o_history), 4 * self.h_dim))
+            o_h = o_h.squeeze()
         
-        else:
-            if len(s_hist) == 0:
-                s_h = torch.zeros(self.h_dim).cuda()
-            else:
-                if len(self.s_hist_test[s][r]) == 0:
-                    self.s_hist_test[s][r] = s_hist.copy()
-                s_history = self.s_hist_test[s][r]
-                inp, _ = self.aggregator.predict(s_history, s, r, self.ent_embeds, self.rel_embeds[:self.num_rels])
-                tt, s_h = self.encoder(inp.view(1, len(s_history), 3 * self.h_dim))
-                s_h = s_h.squeeze()
-            
-            if len(o_hist) == 0:
-                o_h = torch.zeros(self.h_dim).cuda()
-            else:
-                if len(self.o_hist_test[o][r]) == 0:
-                    self.o_hist_test[o][r] = o_hist.copy()
-                o_history = self.o_hist_test[o][r]
-                inp, _ = self.aggregator.predict(o_history, o, r, self.ent_embeds, self.rel_embeds[self.num_rels:])
-                tt, o_h = self.encoder(inp.view(1, len(o_history), 3 * self.h_dim))
-                o_h = o_h.squeeze()
 
         ob_pred = self.linear(torch.cat((self.ent_embeds[s], s_h, self.rel_embeds[:self.num_rels][r]), dim=0))
         sub_pred = self.linear(torch.cat((self.ent_embeds[o], o_h, self.rel_embeds[self.num_rels:][r]), dim=0))
