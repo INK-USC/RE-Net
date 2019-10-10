@@ -96,7 +96,6 @@ def get_data(s_hist, o_hist):
     data = None
     for i, s_his in enumerate(s_hist):
         if len(s_his) != 0:
-            # print(s_his)
             tem = torch.cat((torch.LongTensor([i]).repeat(len(s_his), 1), torch.LongTensor(s_his.cpu())), dim=1)
             if data is None:
                 data = tem.cpu().numpy()
@@ -119,7 +118,6 @@ def make_subgraph(g, nodes):
 
     for node in nodes:
         relabeled_nodes.append(g.ids[node])
-
     sub_g = g.subgraph(relabeled_nodes)
 
     sub_g.ndata.update({k: g.ndata[k][sub_g.parent_nid] for k in g.ndata if k != 'norm'})
@@ -163,10 +161,7 @@ def get_g_list_id(neighs_t, graph_dict):
     idx = 0
     for tim in neighs_t.keys():
         g_id_dict[tim] = idx
-        # print(tim)
-        # print(neighs_t[tim])
         g_list.append(make_subgraph(graph_dict[tim], neighs_t[tim]))
-        # print(g_list[idx].ids)
         if idx == 0:
             g_list[idx].start_id = 0
         else:
@@ -211,7 +206,7 @@ def get_sorted_s_r_embed(s_hist, s, r, ent_embeds):
     embeds_split = torch.split(embeds, len_s)
     return s_len_non_zero, s_tem, r_tem, embeds, len_s, embeds_split
 
-def get_sorted_s_r_embed_rgcn(s_hist_data, s, r, ent_embeds, graph_dict):
+def get_sorted_s_r_embed_rgcn(s_hist_data, s, r, ent_embeds, graph_dict, global_emb):
     s_hist = s_hist_data[0]
     s_hist_t = s_hist_data[1]
     s_hist_len = torch.LongTensor(list(map(len, s_hist))).cuda()
@@ -220,11 +215,14 @@ def get_sorted_s_r_embed_rgcn(s_hist_data, s, r, ent_embeds, graph_dict):
     s_len_non_zero = s_len[:num_non_zero]
     s_hist_sorted = []
     s_hist_t_sorted = []
+    global_emb_list = []
     for i, idx in enumerate(s_idx):
         if i == num_non_zero:
             break
         s_hist_sorted.append(s_hist[idx])
         s_hist_t_sorted.append(s_hist_t[idx])
+        for tt in s_hist_t[idx]:
+            global_emb_list.append(global_emb[tt].view(1, ent_embeds.shape[1]).cpu())
 
     s_tem = s[s_idx]
     r_tem = r[s_idx]
@@ -239,5 +237,84 @@ def get_sorted_s_r_embed_rgcn(s_hist_data, s, r, ent_embeds, graph_dict):
     batched_graph.ndata['h'] = ent_embeds[batched_graph.ndata['id']].view(-1, ent_embeds.shape[1])
 
     move_dgl_to_cuda(batched_graph)
+    global_emb_list = torch.cat(global_emb_list, dim=0).cuda()
 
-    return s_len_non_zero, s_tem, r_tem, batched_graph, node_ids_graph
+    return s_len_non_zero, s_tem, r_tem, batched_graph, node_ids_graph, global_emb_list
+
+def get_s_r_embed_rgcn(s_hist_data, s, r, ent_embeds, graph_dict, global_emb):
+    s_hist = s_hist_data[0]
+    s_hist_t = s_hist_data[1]
+    s_hist_len = torch.LongTensor(list(map(len, s_hist))).cuda()
+
+    s_idx = torch.arange(0,len(s_hist_len))
+    s_len = s_hist_len
+    num_non_zero = len(torch.nonzero(s_len))
+    s_len_non_zero = s_len[:num_non_zero]
+    s_hist_sorted = []
+    s_hist_t_sorted = []
+    global_emb_list = []
+    for i, idx in enumerate(s_idx):
+        if i == num_non_zero:
+            break
+        s_hist_sorted.append(s_hist[idx])
+        s_hist_t_sorted.append(s_hist_t[idx])
+        for tt in s_hist_t[idx]:
+            global_emb_list.append(global_emb[tt].view(1, ent_embeds.shape[1]).cpu())
+
+    s_tem = s[s_idx]
+    r_tem = r[s_idx]
+
+    neighs_t = get_neighs_by_t(s_hist_sorted, s_hist_t_sorted, s_tem)
+
+    g_list, g_id_dict = get_g_list_id(neighs_t, graph_dict)
+
+    node_ids_graph, len_s = get_node_ids_to_g_id(s_hist_sorted, s_hist_t_sorted, s_tem, g_list, g_id_dict)
+
+    batched_graph = dgl.batch(g_list)
+    batched_graph.ndata['h'] = ent_embeds[batched_graph.ndata['id']].view(-1, ent_embeds.shape[1])
+
+    move_dgl_to_cuda(batched_graph)
+    global_emb_list = torch.cat(global_emb_list, dim=0).cuda()
+
+    return s_len_non_zero, s_tem, r_tem, batched_graph, node_ids_graph, global_emb_list
+
+
+# assuming pred and soft_targets are both Variables with shape (batchsize, num_of_classes), each row of pred is predicted logits and each row of soft_targets is a discrete distribution.
+def soft_cross_entropy(pred, soft_targets):
+    logsoftmax = torch.nn.LogSoftmax()
+    pred = pred.type('torch.DoubleTensor').cuda()
+    return torch.mean(torch.sum(- soft_targets * logsoftmax(pred), 1))
+
+def get_true_distribution(train_data, num_s):
+    true_s = np.zeros(num_s)
+    true_o = np.zeros(num_s)
+    true_prob_s = None
+    true_prob_o = None
+    current_t = 0
+    for triple in train_data:
+        s = triple[0]
+        o = triple[2]
+        t = triple[3]
+        true_s[s] += 1
+        true_o[o] += 1
+        if current_t != t:
+
+            true_s = true_s / np.sum(true_s)
+            true_o = true_o /np.sum(true_o)
+
+            if true_prob_s is None:
+                true_prob_s = true_s.reshape(1, num_s)
+                true_prob_o = true_o.reshape(1, num_s)
+            else:
+                true_prob_s = np.concatenate((true_prob_s, true_s.reshape(1, num_s)), axis=0)
+                true_prob_o = np.concatenate((true_prob_o, true_o.reshape(1, num_s)), axis=0)
+
+            true_s = np.zeros(num_s)
+            true_o = np.zeros(num_s)
+            current_t = t
+
+
+    true_prob_s = np.concatenate((true_prob_s, true_s.reshape(1, num_s)), axis=0)
+    true_prob_o = np.concatenate((true_prob_o, true_o.reshape(1, num_s)), axis=0)
+
+    return true_prob_s, true_prob_o

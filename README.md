@@ -1,19 +1,19 @@
 ## PyTorch implementation of Recurrent Event Network (RE-Net)
 
-Paper: [Recurrent Event Network for Reasoning over Temporal Knowledge Graph](https://arxiv.org/abs/1904.05530)
+Paper: [Recurrent Event Network: Global Structure Inference over Temporal Knowledge Graph](https://arxiv.org/abs/1904.05530)
 
 This repository contains the implementation of the RE-Net architectures described in the paper.
 
 <p align="center"><img src="figs/renet.png" width="400"/></p>
 
-Recently, there has been a surge of interest in learning representation of graph-structured data that are dynamically evolving. However, current dynamic graph learning methods lack a principled way in modeling temporal, multi-relational, and concurrent interactions between nodes—a limitation that is especially problematic for the task of temporal knowledge graph reasoning, where the goal is to predict unseen entity relationships (i.e., events) over time. Here we present Recurrent Event Network (RE-Net)—a novel neural architecture for modeling complex event sequences—which consists of a recurrent event encoder and a neighborhood aggregator.
+Modeling dynamically-evolving, multi-relational graph data has received a surge of interests with the rapid growth of heterogeneous event data. However, predicting future events on such data requires global structure inference over time and the ability to integrate temporal and structural information, which are not yet well understood. We present Recurrent Event Network (RE-Net), a novel autoregressive architecture for modeling temporal sequences of multi-relational graphs (e.g., temporal knowledge graph), which can perform sequential, global structure inference over future time stamps to predict new events. RE-Net employs a recurrent event encoder to model the temporally conditioned joint probability distribution for the event sequences, and equips the event encoder with a neighborhood aggregator for modeling the concurrent events within a time window associated with each entity. We apply teacher forcing for model training over historical data, and infer graph sequences over future time stamps by sampling from the learned joint distribution in a sequential manner. 
 
 If you make use of this code or the RE-Net algorithm in your work, please cite the following paper:
 
 ```bibtex
 @article{jin2019recurrent,
 	title={Recurrent Event Network for Reasoning over Temporal Knowledge Graphs},
-	author={Jin, Woojeong and Jiang, He and Zhang, Changlin and Szekely, Pedro and Ren, Xiang},
+	author={Jin, Woojeong and Jiang, He and Qu, Meng and Chen, Tong and Zhang, Changlin and Szekely, Pedro and Ren, Xiang},
 	journal={arXiv preprint arXiv:1904.05530},
 	year={2019}
 }
@@ -25,46 +25,53 @@ If you make use of this code or the RE-Net algorithm in your work, please cite t
 - [Related Work](#Related-Work)
 - [Datasets](#Datasets)
 - [Baselines](#Baselines)
-- [Predictive Performances](#Predictive-performances)
+<!-- - [Predictive Performances](#Predictive-performances) -->
 
 ## Installation
 Install PyTorch (>= 0.4.0) and DGL following the instuctions on the [PyTorch](https://pytorch.org/) and [DGL](https://www.dgl.ai).
 Our code is written in Python3.
 
 ## Train and Test
-Before running, you should preprocess datasets.
+Before running, the user should preprocess datasets.
+In this code, RENet with RGCN aggregator is included. 
 
-For attentive, mean, pooling aggregators (model 0,1,2)
+<!-- For attentive, mean, pooling aggregators (model 0,1,2)
 ```bash
 cd data/DATA_NAME
 python3 get_history.py
-```
+``` -->
 
-For an RGCN aggregator (model 3)
+<!-- For an RGCN aggregator (model 3) -->
 ```bash
 cd data/DATA_NAME
 python3 get_history_graph.py
 ```
 
 Then, we are ready to train and test.
+We first pretrain the global model.
+```bash
+python3 pretrain.py -d DATA_NAME --gpu 0 --dropout 0.5 --n-hidden 200 --lr 1e-3 --max-epochs 20 --batch-size 1024
+```
+
 We first train the model.
 ```bash
-python3 train.py -d DATA_NAME --gpu 0 --model 0 --dropout 0.5 --n-hidden 200 --lr 1e-3 --max-epochs 20 --batch-size 1024
+python3 train.py -d DATA_NAME --gpu 0 --dropout 0.5 --n-hidden 200 --lr 1e-3 --max-epochs 20 --batch-size 1024
 ```
 
 We are ready to test!
 ```bash
-python3 test.py -d DATA_NAME --gpu 0 --model 0 --n-hidden 200
+python3 test.py -d DATA_NAME --gpu 0 --n-hidden 200
 ```
 
 The default hyperparameters give the best performances.
 
-### Model variants
-The user must specify a --model, the variants of which are described in detail in the paper:
+<!-- ### Model variants -->
+
+<!-- The user must specify a --model, the variants of which are described in detail in the paper:
 - Attentive aggregator: --model 0
 - Mean aggregator: --model 1
 - Pooling aggregator: --model 2
-- RGCN aggregator: --model 3
+- RGCN aggregator: --model 3 -->
 
 ## Related Work
 There are related literatures: Temporal Knowledge Graph Embedding, Dynamic Graph Embedding, Knowledge Graph Embedding, Static Graph Embedding, etc.
@@ -101,7 +108,7 @@ CUDA_VISIBLE_DEVICES=0 python3 TA-TransE.py -f 1 -d ICEWS18 -L 1 -bs 1024 -n 100
 
 The user can find implementations in the 'baselines' folder.
 
-## Predictive Performances
+<!-- ## Predictive Performances
 In the **ICEWS18** dataset, the results with **filtered** metrics:
 
 | Method        | MRR   | Hits@1 | Hits@3 | Hits@10 |
@@ -148,4 +155,4 @@ In the **YAGO** dataset, the results with **filtered** metrics:
 | RE-Net (mean) | 65.51 | 63.85  | 66.06  | 68.03   |
 | RE-Net (attn) | 65.79 | 64.50  | 66.00  | 67.82   |
 | RE-Net (pool) | 63.65 | 61.25  | 64.76  | 67.45   |
-| RE-Net (RGCN) | 65.69 | 64.83  | 66.32  | 68.48   |
+| RE-Net (RGCN) | 65.69 | 64.83  | 66.32  | 68.48   | -->
