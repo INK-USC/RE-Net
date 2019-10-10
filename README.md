@@ -32,8 +32,8 @@ Install PyTorch (>= 0.4.0) and DGL following the instuctions on the [PyTorch](ht
 Our code is written in Python3.
 
 ## Train and Test
-Before running, the user should preprocess datasets.
 In this code, RE-Net with RGCN aggregator is included. 
+Before running, the user should preprocess datasets.
 
 <!-- For attentive, mean, pooling aggregators (model 0,1,2)
 ```bash
@@ -47,13 +47,12 @@ cd data/DATA_NAME
 python3 get_history_graph.py
 ```
 
-Then, we are ready to train and test.
 We first pretrain the global model.
 ```bash
 python3 pretrain.py -d DATA_NAME --gpu 0 --dropout 0.5 --n-hidden 200 --lr 1e-3 --max-epochs 20 --batch-size 1024
 ```
 
-We first train the model.
+Then, train the model.
 ```bash
 python3 train.py -d DATA_NAME --gpu 0 --dropout 0.5 --n-hidden 200 --lr 1e-3 --max-epochs 20 --batch-size 1024
 ```
