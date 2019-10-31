@@ -14,7 +14,7 @@ If you make use of this code or the RE-Net algorithm in your work, please cite t
 @article{jin2019recurrent,
 	title={Recurrent Event Network: Global Structure Inference over Temporal Knowledge Graph},
 	author={Jin, Woojeong and Jiang, He and Qu, Meng and Chen, Tong and Zhang, Changlin and Szekely, Pedro and Ren, Xiang},
-	journal={arXiv preprint arXiv:1904.05530},
+	journal={ICLR Workshop on Representation Learning on Graphs and Manifolds (RLGM-ICLR)},
 	year={2019}
 }
 ```
