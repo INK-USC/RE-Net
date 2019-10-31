@@ -78,7 +78,7 @@ We organized the list of [related work](https://github.com/woojeongjin/dynamic-K
 
 ## Datasets
 There are four datasets: [ICEWS18](https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/28075/Z1ZFYG&version=25.0), [ICEWS14](https://github.com/rstriv/Know-Evolve) (from Know-Evolve), [GDELT](https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/), [WIKI](https://www.wikidata.org/wiki/Wikidata:Main_Page), and [YAGO](https://www.mpi-inf.mpg.de/departments/databases-and-information-systems/research/yago-naga/yago/). 
-These datasets are for the *extrapolation* problem, Times of test set should be larger than times of train and valid sets. (Times of valid set also should be larger than times of train set.)
+These datasets are for the *extrapolation* problem. Times of test set should be larger than times of train and valid sets. (Times of valid set also should be larger than times of train set.)
 Each data folder has 'stat.txt', 'train.txt', 'valid.txt', 'test.txt', 'get_history.py', and 'get_history_graph.py'.
 - 'get_history.py': This is for getting history for model 0, 1, and 2.
 - 'get_history_graph.py': This is for getting history and graph for model 3.
