@@ -2,6 +2,8 @@
 
 Paper: [Recurrent Event Network: Global Structure Inference over Temporal Knowledge Graph](https://arxiv.org/abs/1904.05530)
 
+TL;DR: We propose an autoregressive model to infer graph structures at unobserved times on temporal knowledge graphs (*extrapolation* problem).
+
 This repository contains the implementation of the RE-Net architectures described in the paper.
 
 <p align="center"><img src="figs/renet.png" width="500"/></p>
