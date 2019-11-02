@@ -75,7 +75,7 @@ The default hyperparameters give the best performances.
 ## Related Work
 Our work is on an *extrapolation* problem. There are only a few work on the problem.
 Many studies on temporal knowledge graphs are focused on an *intrapolation* problem.
-We organized the list of [related work](https://github.com/woojeongjin/dynamic-KG) such as Temporal Knowledge Graph Embedding, Dynamic Graph Embedding, Knowledge Graph Embedding, and Static Graph Embedding.
+We organized the list of [related work](https://github.com/woojeongjin/dynamic-KG) such as Temporal Knowledge Graph Reasoning, Dynamic Graph Embedding, Knowledge Graph Embedding, and Static Graph Embedding.
 <!-- There are related literatures: Temporal Knowledge Graph Embedding, Dynamic Graph Embedding, Knowledge Graph Embedding, Static Graph Embedding, etc.
 We organized the list of [related work](https://github.com/woojeongjin/dynamic-KG).
  -->
