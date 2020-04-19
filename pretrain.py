@@ -94,17 +94,17 @@ def train(args):
               format(epoch, loss_epoch / (len(train_times) / args.batch_size), t3 - t0))
         if loss_epoch < loss_small:
             loss_small = loss_epoch
-            if args.model == 3:
-                torch.save({'state_dict': model.state_dict(), 'global_emb': model.global_emb},
-                           model_state_file)
+            # if args.model == 3:
+            torch.save({'state_dict': model.state_dict(), 'global_emb': model.global_emb},
+                        model_state_file)
                 # with open(model_graph_file, 'wb') as fp:
                 #     pickle.dump(model.graph_dict, fp)
-            else:
-                torch.save({'state_dict': model.state_dict(), 'epoch': epoch,
-                            's_hist': model.s_hist_test, 's_cache': model.s_his_cache,
-                            'o_hist': model.o_hist_test, 'o_cache': model.o_his_cache,
-                            'latest_time': model.latest_time},
-                           model_state_file)
+            # else:
+            #     torch.save({'state_dict': model.state_dict(), 'epoch': epoch,
+            #                 's_hist': model.s_hist_test, 's_cache': model.s_his_cache,
+            #                 'o_hist': model.o_hist_test, 'o_cache': model.o_his_cache,
+            #                 'latest_time': model.latest_time},
+            #                model_state_file)
 
     print("training done")
 
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     parser.add_argument("--max-epochs", type=int, default=100
                         ,
                         help="maximum epochs")
-    parser.add_argument("--model", type=int, default=0)
+    parser.add_argument("--model", type=int, default=3)
     parser.add_argument("--seq-len", type=int, default=10)
     parser.add_argument("--num-k", type=int, default=10,
                         help="cuttoff position")
