@@ -90,6 +90,7 @@ class RGCNAggregator_global(nn.Module):
         g_list = []
 
         for tim in timess:
+            move_dgl_to_cuda(graph_dict[tim.item()])
             g_list.append(graph_dict[tim.item()])
 
         batched_graph = dgl.batch(g_list)
