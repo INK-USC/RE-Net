@@ -33,6 +33,14 @@ If you make use of this code or the RE-Net algorithm in your work, please cite t
 Install PyTorch (>= 0.4.0) and DGL following the instuctions on the [PyTorch](https://pytorch.org/) and [DGL](https://www.dgl.ai).
 Our code is written in Python3.
 
+Run the following commands to create a conda environment (assume CUDA10):
+```bash
+conda create -n renet python=3.6 numpy
+source activate renet
+conda install pytorch torchvision -c pytorch
+pip install dgl-cu100
+```bash
+
 ## Train and Test
 In this code, RE-Net with RGCN aggregator is included. 
 Before running, the user should preprocess datasets.
