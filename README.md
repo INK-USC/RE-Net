@@ -39,7 +39,7 @@ conda create -n renet python=3.6 numpy
 source activate renet
 conda install pytorch torchvision -c pytorch
 pip install dgl-cu100
-```bash
+```
 
 ## Train and Test
 In this code, RE-Net with RGCN aggregator is included. 
