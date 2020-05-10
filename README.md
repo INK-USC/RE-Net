@@ -37,7 +37,7 @@ Run the following commands to create a conda environment (assume CUDA10):
 ```bash
 conda create -n renet python=3.6 numpy
 source activate renet
-conda install pytorch torchvision -c pytorch
+pip install torch torchvision
 pip install dgl-cu100
 ```
 
