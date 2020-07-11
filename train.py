@@ -130,7 +130,7 @@ def train(args):
                                                                                o_history_shuffle, o_history_t_shuffle, args.batch_size):
             # break
 
-            batch_data = torch.from_numpy(batch_data)
+            batch_data = torch.from_numpy(batch_data).long()
             if use_cuda:
                 batch_data = batch_data.cuda()
             loss_s = model(batch_data, (s_hist, s_hist_t), (o_hist, o_hist_t), graph_dict, subject=True)
