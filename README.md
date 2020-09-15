@@ -1,6 +1,6 @@
 ## PyTorch implementation of Recurrent Event Network (RE-Net)
 
-Paper: [Recurrent Event Network: Global Structure Inference over Temporal Knowledge Graph](https://arxiv.org/abs/1904.05530)
+Paper: [Recurrent Event Network: Autoregressive Structure Inference over Temporal Knowledge Graphs](https://arxiv.org/abs/1904.05530)
 
 TL;DR: We propose an autoregressive model to infer graph structures at unobserved times on temporal knowledge graphs (*extrapolation* problem).
 
@@ -8,16 +8,16 @@ This repository contains the implementation of the RE-Net architectures describe
 
 <p align="center"><img src="figs/renet.png" width="500"/></p>
 
-Modeling dynamically-evolving, multi-relational graph data has received a surge of interests with the rapid growth of heterogeneous event data. However, predicting future events on such data requires global structure inference over time and the ability to integrate temporal and structural information, which are not yet well understood. We present Recurrent Event Network (RE-Net), a novel autoregressive architecture for modeling temporal sequences of multi-relational graphs (e.g., temporal knowledge graph), which can perform sequential, global structure inference over future time stamps to predict new events. RE-Net employs a recurrent event encoder to model the temporally conditioned joint probability distribution for the event sequences, and equips the event encoder with a neighborhood aggregator for modeling the concurrent events within a time window associated with each entity. We apply teacher forcing for model training over historical data, and infer graph sequences over future time stamps by sampling from the learned joint distribution in a sequential manner. 
+Knowledge graph reasoning is a critical task in natural language processing. The task becomes more challenging on temporal knowledge graphs, where each fact is associated with a timestamp. Most existing methods focus on reasoning at past timestamps, which are not able to predict facts happening in the future. This paper proposes Recurrent Event Network (RE-Net), a novel autoregressive architecture for predicting future interactions. The occurrence of a fact (event) is modeled as a probability distribution conditioned on temporal sequences of past knowledge graphs. Speciﬁcally, our RE-Net employs a recurrent event encoder to encode past facts, and uses a neighborhood aggregator to model the connection of facts at the same timestamp. Future facts can then be inferred in a sequential manner based on the two modules. We evaluate our proposed method via link prediction at future times on ﬁve public datasets. Through extensive experiments we demonstrate the strength of RE-Net, especially on multi-step inference over future time stamps, and achieve state-of-the-art performance on all five datasets.
 
 If you make use of this code or the RE-Net algorithm in your work, please cite the following paper:
 
 ```bibtex
-@article{jin2019recurrent,
-	title={Recurrent Event Network: Global Structure Inference over Temporal Knowledge Graph},
-	author={Jin, Woojeong and Jiang, He and Qu, Meng and Chen, Tong and Zhang, Changlin and Szekely, Pedro and Ren, Xiang},
-	journal={ICLR-RLGM},
-	year={2019}
+@inproceedings{jin2020Renet,
+	title={Recurrent Event Network: Autoregressive Structure Inference over Temporal Knowledge Graphs},
+	author={Jin, Woojeong and Qu, Meng and Jin, Xisen and Ren, Xiang},
+	booktitle={EMNLP},
+	year={2020}
 }
 ```
 
