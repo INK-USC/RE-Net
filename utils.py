@@ -233,6 +233,8 @@ def get_sorted_s_r_embed_rgcn(s_hist_data, s, r, ent_embeds, graph_dict, global_
 
     node_ids_graph, len_s = get_node_ids_to_g_id(s_hist_sorted, s_hist_t_sorted, s_tem, g_list, g_id_dict)
 
+    idx = torch.cuda.current_device()
+    g_list = [g.to(torch.device('cuda:'+str(idx))) for g in g_list]  
     batched_graph = dgl.batch(g_list)
     batched_graph.ndata['h'] = ent_embeds[batched_graph.ndata['id']].view(-1, ent_embeds.shape[1])
 
@@ -270,6 +272,8 @@ def get_s_r_embed_rgcn(s_hist_data, s, r, ent_embeds, graph_dict, global_emb):
 
     node_ids_graph, len_s = get_node_ids_to_g_id(s_hist_sorted, s_hist_t_sorted, s_tem, g_list, g_id_dict)
 
+    idx = torch.cuda.current_device()
+    g_list = [g.to(torch.device('cuda:'+str(idx))) for g in g_list]  
     batched_graph = dgl.batch(g_list)
     batched_graph.ndata['h'] = ent_embeds[batched_graph.ndata['id']].view(-1, ent_embeds.shape[1])
 

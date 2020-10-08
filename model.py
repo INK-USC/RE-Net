@@ -220,9 +220,8 @@ class RENet(nn.Module):
         t = triplet[3].cpu()
 
         if self.latest_time != t:
-            # print(t, self.latest_time.item())
-            global_emb_prev_t, sub, prob_sub = global_model.predict(t, self.graph_dict, subject=True)
-            self.global_emb[self.latest_time.item()] = global_emb_prev_t
+            _, sub, prob_sub = global_model.predict(self.latest_time, self.graph_dict, subject=True)
+            
             m = torch.distributions.categorical.Categorical(prob_sub)
             subjects = m.sample(torch.Size([self.num_k]))
             prob_subjects = prob_sub[subjects]
@@ -300,6 +299,8 @@ class RENet(nn.Module):
 
             self.data = get_data(self.s_his_cache, self.o_his_cache)
             self.graph_dict[self.latest_time.item()] = get_big_graph(self.data, self.num_rels)
+            global_emb_prev_t, _, _ = global_model.predict(self.latest_time, self.graph_dict, subject=True)
+            self.global_emb[self.latest_time.item()] = global_emb_prev_t
 
             for ee in range(self.in_dim):
                 if len(self.s_his_cache[ee]) != 0:
