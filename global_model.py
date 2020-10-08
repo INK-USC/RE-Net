@@ -78,7 +78,7 @@ class RENet_global(nn.Module):
     Prediction function in testing
     """
 
-    def predict(self, t, graph_dict, subject=True):  # Predict s at time t, so <t-1 graphs are used.
+    def predict(self, t, graph_dict, subject=True):  # Predict s at time t, so <= t-1 graphs are used.
         if subject:
             linear = self.linear_s
             reverse = False
