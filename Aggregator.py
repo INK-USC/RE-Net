@@ -33,7 +33,7 @@ class RGCNAggregator_global(nn.Module):
         t_list = t_list[:num_non_zero]
 
         for tim in t_list:
-            length = int(tim / time_unit)
+            length = int(tim // time_unit)
             if self.seq_len <= length:
                 time_list.append(torch.LongTensor(times[length - self.seq_len:length]))
                 len_non_zero.append(self.seq_len)
