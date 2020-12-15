@@ -30,8 +30,6 @@ If you make use of this code or the RE-Net algorithm in your work, please cite t
 <!-- - [Predictive Performances](#Predictive-performances) -->
 
 ## Installation
-Our code is written in Python3.
-
 Run the following commands to create a conda environment (assume CUDA10.1):
 ```bash
 conda create -n renet python=3.6 numpy
