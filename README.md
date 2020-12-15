@@ -30,15 +30,14 @@ If you make use of this code or the RE-Net algorithm in your work, please cite t
 <!-- - [Predictive Performances](#Predictive-performances) -->
 
 ## Installation
-Install PyTorch (>= 0.4.0) and DGL following the instuctions on the [PyTorch](https://pytorch.org/) and [DGL](https://www.dgl.ai).
 Our code is written in Python3.
 
-Run the following commands to create a conda environment (assume CUDA10):
+Run the following commands to create a conda environment (assume CUDA10.1):
 ```bash
 conda create -n renet python=3.6 numpy
-source activate renet
-pip install torch torchvision
-pip install dgl-cu100
+conda activate renet
+pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+conda install -c dglteam "dgl-cuda10.1<0.5"
 ```
 
 ## Train and Test
