@@ -1,0 +1,10 @@
+<wasBornIn>	0
+<diedIn>	7
+<worksAt>	1
+<playsFor>	2
+<hasWonPrize>	3
+<isMarriedTo>	4
+<owns>	5
+<graduatedFrom>	6
+<isAffiliatedTo>	8
+<created>	9
