@@ -94,6 +94,8 @@ Each data folder has 'stat.txt', 'train.txt', 'valid.txt', 'test.txt',and 'get_h
 - 'stat.txt': First value is the number of entities, and second value is the number of relations.
 - 'train.txt', 'valid.txt', 'test.txt': First column is subject entities, second column is relations, and third column is object entities. The fourth column is time. The fifth column is for know-evolve's data format. It is ignored in RE-Net.
 
+For relation names in GDELT, please refer to the [GDLET codebook](http://data.gdeltproject.org/documentation/CAMEO.Manual.1.1b3.pdf).
+
 ## Baselines
 We use the following public codes for baselines and hyperparameters. We validated embedding sizes among presented values.
 
