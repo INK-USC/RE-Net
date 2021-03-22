@@ -12,11 +12,13 @@
     
     use `preprocess_TA_step1.py` and `preprocess_TA_step2.py` to make data for TATransE and TADistMult.
     ```
+    cd data
     python3 preprocess_TA_step1.py ICEWS18
     python3 preprocess_TA_step2.py ICEWS18
     ```  
     use `preprocess_TTransE.py` to make data for TTransE.  
     ```
+    cd data
     python3 preprocess_TTransE.py ICEWS18
     ```
 
