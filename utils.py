@@ -120,8 +120,8 @@ def make_subgraph(g, nodes):
         relabeled_nodes.append(g.ids[node])
     sub_g = g.subgraph(relabeled_nodes)
 
-    sub_g.ndata.update({k: g.ndata[k][sub_g.parent_nid] for k in g.ndata if k != 'norm'})
-    sub_g.edata.update({k: g.edata[k][sub_g.parent_eid] for k in g.edata})
+    sub_g.ndata.update({k: g.ndata[k][sub_g.ndata[dgl.NID]] for k in g.ndata if k != 'norm'})
+    sub_g.edata.update({k: g.edata[k][sub_g.edata[dgl.EID]] for k in g.edata})
     sub_g.ids = {}
     norm = comp_deg_norm(sub_g)
     sub_g.ndata['norm'] = norm.view(-1,1)
