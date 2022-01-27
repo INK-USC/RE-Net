@@ -74,8 +74,9 @@ def load_quadruples(inPath, fileName, fileName2=None):
 
 
 def get_data_with_t(data, tim):
-    triples = [[quad[0], quad[1], quad[2]] for quad in data if quad[3] == tim]
-    return np.array(triples)
+    x = data[np.where(data[3] == tim)].copy()
+    x = np.delete(x, 3, 1) # drops 3rd column
+    return x
 
 
 def comp_deg_norm(g):
