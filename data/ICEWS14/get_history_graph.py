@@ -74,7 +74,7 @@ def load_quadruples(inPath, fileName, fileName2=None):
 
 
 def get_data_with_t(data, tim):
-    x = data[np.where(data[3] == tim)].copy()
+    x = data[np.where(data[:,3] == tim)].copy()
     x = np.delete(x, 3, 1) # drops 3rd column
     return x
 
